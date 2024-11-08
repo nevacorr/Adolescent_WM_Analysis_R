@@ -16,11 +16,7 @@ MPF_v1 <- read.csv(file.path(data_dir, MPF_v1_filename))
 FA_v1 <- read.csv(file.path(data_dir, FA_v1_filename))
 MD_v1 <- read.csv(file.path(data_dir, MD_v1_filename))
 
-sarica <- tractable::read_afq_sarica()
-
-# Assuming you have dataframes df_mpf, df_f, and df_m
 # Reshape each dataframe and add a 'type' column
-
 df_mpf_long <- MPF_v1 %>%
   pivot_longer(cols = matches(".*_"),  
                names_to = c("tractID", "nodeID"), 
@@ -61,18 +57,9 @@ df_combined <- df_combined %>%
   ))
 
 df_combined$nodeID <- as.integer(df_combined$nodeID)
-#df_combined$Age <- as.integer(df_combined$Age)
-# Add the "group" column and set all values to 1, with class "factor"
-#df_combined$group <- factor(1)
 
 # View the combined dataframe
 print(df_combined)
-
-unique_count <- length(unique(sarica$age))
-print(unique_count)
-
-#df_combined <- df_combined %>%
-#  filter(!(tractID %in% c("Left Uncinate", "Right Arcuate")))
 
 # Find rows with any NA values
 rows_with_na <- df_combined[rowSums(is.na(df_combined)) > 0, ]
@@ -98,16 +85,16 @@ d2 <- df_combined %>%
   ) %>%
   select(-dummy)
 
-# Step 1: Join d1 with d2 to get the fa_node2 and fa_node99 values (no need for nodeID in d2)
+# Join d1 with d2 to get the fa_node2 and fa_node99 values 
 d1_with_d2 <- df_combined %>%
   left_join(d2 %>% select(tractID, Subject, node_2, node_99), by = c("tractID", "Subject"))
 
-# Step 2: Replace NaN values in fa based on nodeID conditions
+#  Replace NaN values in fa based on nodeID conditions
 d1_updated <- d1_with_d2 %>%
   mutate(
     fa = case_when(
-      is.na(fa) & nodeID == 1 ~ node_2,     # Replace NaN with node_2 if nodeID is 1
-      is.na(fa) & nodeID == 100 ~ node_99,  # Replace NaN with node_99 if nodeID is 100
+      is.na(fa) & nodeID == 1 ~ node_2,     # Replace NaN fa with node_2 fa if nodeID fa is 1
+      is.na(fa) & nodeID == 100 ~ node_99,  # Replace NaN fa with node_99 fa if nodeID fa is 100
       TRUE ~ fa                            # Keep the original fa if no replacement is needed
     )
   ) %>%
@@ -120,11 +107,16 @@ df_cleaned <- na.omit(d1_updated)
 rows_with_na <- df_cleaned[rowSums(is.na(df_cleaned)) > 0, ]
 print(rows_with_na)
 
+# Get a list of unique values in the tractID column
+unique_tracts <- unique(d1_updated$tractID)
+
 tractable::plot_tract_profiles(
   df          = df_cleaned,
   group_col   = "Age",
   n_groups    = 5,
-  metrics     = c("fa", "md"),
-  bundles     = list("Right Corticospinal", "Right SLF")
+  metrics     = c("md", "mpf", "fa"),
+  bundles     = unique_tracts,
+  figsize   = c(8, 8),
+  pal_name = "BuGn"
 )
 
