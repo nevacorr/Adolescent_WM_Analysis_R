@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 PlotTractProfiles_visit1.R
+*.png
