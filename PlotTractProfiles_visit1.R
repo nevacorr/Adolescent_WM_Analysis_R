@@ -2,6 +2,7 @@ library(tractable)
 library(tidyverse)
 library(stringr)
 library(dplyr)
+library(RColorBrewer)
 
 # Remove all variables in the environment
 rm(list = ls())
@@ -49,21 +50,21 @@ df_combined$tractID <- str_replace_all(df_combined$tractID, "\\.", " ")
 # Using mutate to add an Age column based on Subject numbers
 df_combined <- df_combined %>%
   mutate(Age = case_when(
-    Subject >= 100 & Subject < 200 ~ factor(9),
-    Subject >= 200 & Subject < 300 ~ factor(11),
-    Subject >= 300 & Subject < 400 ~ factor(13),
-    Subject >= 400 & Subject < 500 ~ factor(15),
-    Subject >= 500 & Subject < 600 ~ factor(17)
+    Subject >= 100 & Subject < 200 ~ 9,
+    Subject >= 200 & Subject < 300 ~ 11,
+    Subject >= 300 & Subject < 400 ~ 13,
+    Subject >= 400 & Subject < 500 ~ 15,
+    Subject >= 500 & Subject < 600 ~ 17
   ))
 
 df_combined$nodeID <- as.integer(df_combined$nodeID)
 
 # View the combined dataframe
-print(df_combined)
+# print(df_combined)
 
 # Find rows with any NA values
-rows_with_na <- df_combined[rowSums(is.na(df_combined)) > 0, ]
-print(rows_with_na)
+# rows_with_na <- df_combined[rowSums(is.na(df_combined)) > 0, ]
+# print(rows_with_na)
 
 d2 <- df_combined %>%
   select(tractID, Subject) %>%
@@ -104,8 +105,8 @@ d1_updated <- d1_with_d2 %>%
 df_cleaned <- na.omit(d1_updated)
 
 # Find rows with any NA values
-rows_with_na <- df_cleaned[rowSums(is.na(df_cleaned)) > 0, ]
-print(rows_with_na)
+# rows_with_na <- df_cleaned[rowSums(is.na(df_cleaned)) > 0, ]
+# print(rows_with_na)
 
 # Get a list of unique values in the tractID column
 unique_tracts <- unique(d1_updated$tractID)
@@ -117,6 +118,34 @@ tractable::plot_tract_profiles(
   metrics     = c("md", "mpf", "fa"),
   bundles     = unique_tracts,
   figsize   = c(8, 8),
-  pal_name = "BuGn"
+  pal_name = "Spectral"
 )
 
+gam_fit_cst <- tractable::tractable_single_bundle(
+  df             = df_cleaned,
+  tract          = "Right ILF",
+  participant_id = "Subject",
+  dwi_metric     = "fa",
+  covariates     = c("Age"),
+  k              = "auto"
+)
+
+summary(gam_fit_cst)
+
+results <- list()
+
+# Loop through each tract in the list
+for (tract in unique_tracts) {
+ 
+  fit <- tractable::tractable_single_bundle(
+    df             = df_cleaned,
+    tract          = tract,      
+    participant_id = "Subject",
+    group_by       = "Age",
+    dwi_metric     = "fa",
+    covariates     = c("Age"),
+    k              = "auto"
+  )
+  
+  results[[tract]] <- fit
+}
