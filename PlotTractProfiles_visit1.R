@@ -121,17 +121,17 @@ tractable::plot_tract_profiles(
   pal_name = "Spectral"
 )
 
-# gam_fit_cst <- tractable::tractable_single_bundle(
-#   df             = df_cleaned,
-#   tract          = "Right ILF",
-#   participant_id = "Subject",
-#   dwi_metric     = "fa",
-#   covariates     = c("Age"),
-#   k              = "auto"
-# )
-# 
-# summary(gam_fit_cst)
-# 
+gam_fit_cst <- tractable::tractable_single_bundle(
+  df             = df_cleaned,
+  tract          = "Right ILF",
+  participant_id = "Subject",
+  dwi_metric     = "fa",
+  covariates     = c("Age"),
+  k              = "auto"
+)
+
+summary(gam_fit_cst)
+
 # results <- list()
 # 
 # # Loop through each tract in the list
