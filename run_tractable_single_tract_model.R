@@ -6,11 +6,14 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
     metric = character(),
     tract = character(),
     intercept_p = numeric(),
-    sex_p = numeric(),
     R_sq = numeric(),
     deviance_explained = numeric(),
     stringsAsFactors = FALSE
   )
+  
+  if (sex_flag == 1) {
+    results_df$sex_p <- numeric()
+  }
   
   for (tract in unique_tracts) {
     # Fit the model
@@ -27,8 +30,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
       df = df_z,
       tract = tract,
       target = 'z',
-      regressors = c("sex"),
-      node_group = "sex"
     )
    }
     
@@ -39,16 +40,23 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
     R_sq = model_summary$r.sq
     dev_exp = model_summary$dev.expl
     
-    # Put results in dataframe
-    results_df <- rbind(results_df, data.frame(
-      metric = metric,
+    # Construct result row
+    new_row <- list(
+      metric = metric, 
       tract = tract,
       intercept_p = sprintf("%.3f", intercept_p_value),
-      sex_p = sprintf("%.3f",sex_p_value),
       R_sq = sprintf("%.3f",R_sq),
       deviance_explained = sprintf("%.3f",dev_exp)
-    ))
-    
+    )
+
+  if (sexflag == 1) {
+    new_row$sex_p <- sprintf("%.3f",sex_p_value)
   }
+    
+  # Append new row to dataframe
+  results_df <- rbind(results_df, as.data.frame(new_row))
+  }
+  
+  return(results_df)
 }
 
