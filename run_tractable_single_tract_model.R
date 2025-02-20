@@ -1,3 +1,4 @@
+library(tractable)
 
 run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
   
@@ -20,6 +21,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
         target = 'z',
         regressors = c("sex"),
         node_group = "sex"
+      )
     } else {
     model <-  tractable_single_tract(
       df = df_z,
@@ -27,6 +29,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
       target = 'z',
       regressors = c("sex"),
       node_group = "sex"
+    )
    }
     
     model_summary = summary(model)
