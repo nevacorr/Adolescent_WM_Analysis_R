@@ -6,7 +6,7 @@ library(dplyr)
 rm(list = ls())
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_1_split"
-metric = "md"
+metric = "fa"
 data_filename = paste0("Z_time2_", metric, "_1_split_all_tracts.csv")
 
 source("load_multinode_tract_data.R")
@@ -56,7 +56,8 @@ for (tract in unique_tracts) {
     df = df_z,
     tract = tract,
     target = 'z',
-    regressors = c("sex")
+    regressors = c("sex"),
+    node_group = "sex"
   )
 
   model_summary = summary(model)
