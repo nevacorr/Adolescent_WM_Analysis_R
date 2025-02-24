@@ -11,7 +11,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
     stringsAsFactors = FALSE
   )
   
-  if (sex_flag == 1) {
+  if (sexflag == 1) {
     results_df$sex_p <- numeric()
   }
   
@@ -34,8 +34,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
    }
     
     model_summary = summary(model)
-    
-    sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
+  
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
     R_sq = model_summary$r.sq
     dev_exp = model_summary$dev.expl
@@ -50,6 +49,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
     )
 
   if (sexflag == 1) {
+    sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
     new_row$sex_p <- sprintf("%.3f",sex_p_value)
   }
     
