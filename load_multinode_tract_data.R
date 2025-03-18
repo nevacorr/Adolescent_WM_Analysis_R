@@ -1,11 +1,5 @@
 
-load_data <- function(data_dir, data_filename, metric) {
-
-  # read data file
-  z_orig <- read.csv(file.path(data_dir, data_filename))
-  
-  # remove first column
-  z_orig <- select(z_orig, -X)
+reformat_data <- function(z_orig) {
   
   # reformat to long and add tractID and nodeID columns
   z_df <- z_orig %>%

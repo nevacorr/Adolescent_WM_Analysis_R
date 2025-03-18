@@ -5,13 +5,25 @@ library(dplyr)
 # Remove all variables in the environment
 rm(list = ls())
 
-data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_1_split"
+data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric = "fa"
-data_filename = paste0("Z_time2_", metric, "_1_split_all_tracts.csv")
+data_filename = paste0("Z_time2_", metric, "_100_splits.csv")
+
+# read data file
+z_orig <- read.csv(file.path(data_dir, data_filename))
+
+# remove first column
+z_orig <- select(z_orig, -X)
+
+source("average_across_splits.R")
+
+if ("split" %in% colnames(z_orig)) {
+  z_orig <- average_across_splits(z_orig)
+}
 
 source("load_multinode_tract_data.R")
 
-df_z = load_data(data_dir, data_filename, metric)
+df_z = reformat_data(z_orig)
 
 # Visualize the data
 
