@@ -25,15 +25,11 @@ source("load_multinode_tract_data.R")
 
 df_z = reformat_data(z_orig)
 
-# Convert sex to factors
-df_z <- df_z %>%
-  mutate(
-    sex = factor(sex)
-  )
-
-df_z <- df_z %>% filter(!is.na(z))
+df_z <- df_z[df_z$tractID == "Left.SLF", ]
 
 df_z_male = subset(df_z, sex != "F")
+
+df_z_male <- df_z_male %>% select(-sex, -age)
 
 plot_tract_profiles(
   df = df_z_male, 
@@ -53,4 +49,20 @@ model <-  tractable_single_tract(
 
 model_summary = summary(model)
 print(model_summary)
+
+# Get model predictions (fitted values)
+predicted_values <- predict(model)
+
+df_z_male$predicted_values <- predicted_values
+
+# Plot the predicted values instead of raw z-scores
+plot_tract_profiles(
+  df = df_z_male, 
+  y = "predicted_values",  
+  tracts = "Left.SLF",
+  save_figure = TRUE,
+  ribbon_alpha = 0.20,
+  width = 10,
+  height = 10
+)
 
