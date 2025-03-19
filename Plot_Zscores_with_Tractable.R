@@ -7,7 +7,8 @@ rm(list = ls())
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric = "fa"
-data_filename = paste0("Z_time2_", metric, "_100_splits.csv")
+splits = 100
+data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
 # read data file
 z_orig <- read.csv(file.path(data_dir, data_filename))
@@ -38,6 +39,11 @@ plot_tract_profiles(
   width=10,
   height=10
 )
+
+# Rename output file
+old_filename <- "tracts_by-sex_param-z_profile.png"
+new_filename <- paste0("tracts_by-sex_", metric, "-z_profile_", splits, "splits.png")
+file.rename(old_filename, new_filename)
 
 # Convert sex to factors
 df_z <- df_z %>%
