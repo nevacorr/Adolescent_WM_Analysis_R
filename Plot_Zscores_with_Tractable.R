@@ -6,8 +6,8 @@ library(dplyr)
 rm(list = ls())
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric = "fa"
-splits = 100
+metric = "md"
+splits = 88
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
 # read data file
