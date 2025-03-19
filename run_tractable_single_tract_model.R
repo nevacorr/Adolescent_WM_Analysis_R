@@ -15,6 +15,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
   
   for (tract in unique_tracts) {
     # Fit the model
+    # If comparing across sexes
     if (sexflag == 1) {
       model <-  tractable_single_tract(
         df = df_z,
@@ -24,10 +25,11 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
         node_group = "sex"
       )
     } else {
+    # If looking at each sex separately (df_z only has data for one sex)
     model <-  tractable_single_tract(
       df = df_z,
       tract = tract,
-      target = 'z',
+      target = 'z'
     )
    }
     

@@ -1,7 +1,7 @@
 
 average_across_splits <- function(df) {
   
-  # average columns with the same value for split
+  # average columns with the same value for participant_id
   df_avg <- df %>%
     group_by(participant_id) %>% 
     summarise(across(-split, ~mean(.x, na.rm = TRUE)), .groups = "drop")
