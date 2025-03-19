@@ -53,7 +53,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
     # Append new row to dataframe
     results_df <- rbind(results_df, new_row)
     
-    browser()
   }
   
   return(results_df)
