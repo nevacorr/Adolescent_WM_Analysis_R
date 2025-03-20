@@ -49,9 +49,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag) {
       new_row$sex_p <- sprintf("%.3f",sex_p_value)
     }
     
-    print(tract)
-    print(model_summary)
-    
     # Append new row to dataframe
     results_df <- rbind(results_df, new_row)
     
