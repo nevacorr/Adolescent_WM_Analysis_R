@@ -31,6 +31,8 @@ df_z_male = subset(df_z, sex != "F")
 
 df_z_male <- df_z_male %>% select(-sex, -age)
 
+df_z_male$subjectID <- factor(df_z_male$subjectID)
+
 plot_tract_profiles(
   df = df_z_male, 
   y = "z", 
