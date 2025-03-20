@@ -1,6 +1,5 @@
 
 plot_tracts <- function(df_z, sex){
-  df_z$sex <- factor(df_z$sex, levels = rev(levels(df_z$sex)))
   if (sex == 1) {
     plot_tract_profiles(
       df = df_z, 
@@ -9,7 +8,7 @@ plot_tracts <- function(df_z, sex){
       n_groups = 2,
       save_figure = TRUE,
       ribbon_alpha = 0.20,
-      group_pal = c("Set1"),
+      group_pal = "Set1",
       width=10,
       height=10
     )
@@ -20,8 +19,7 @@ plot_tracts <- function(df_z, sex){
   }
 }
 
-plot_specific_tracts = function(df_z, tractnames, sex, title_suff) {
-  df_z$sex <- factor(df_z$sex, levels = rev(levels(df_z$sex)))
+plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height) {
   if (sex==1) {
     plot_tract_profiles(
       df = df_z, 
@@ -32,8 +30,8 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff) {
       save_figure = TRUE,
       ribbon_alpha = 0.20,
       group_pal = "Set1",
-      width=6.667,
-      height=3.333
+      width=width,
+      height=height
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
