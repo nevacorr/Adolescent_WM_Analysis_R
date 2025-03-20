@@ -45,11 +45,13 @@ old_filename <- "tracts_by-sex_param-z_profile.png"
 new_filename <- paste0("tracts_by-sex_", metric, "-z_profile_", splits, "splits.png")
 file.rename(old_filename, new_filename)
 
-# Convert sex to factors
+# Convert sex to factor
 df_z <- df_z %>%
   mutate(
     sex = factor(sex)
   )
+
+df_z$subjectID <- factor(df_z$subjectID)
 
 # Get unique tract names
 unique_tracts <- unique(df_z$tractID)
@@ -58,6 +60,25 @@ df_z <- df_z %>% filter(!is.na(z))
 
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
+
+# plot_tract_profiles(
+#   df = df_z_male, 
+#   y = "z", 
+#   tracts="Left.SLF",
+#   save_figure = TRUE,
+#   ribbon_alpha = 0.20,
+#   width=10,
+#   height=10
+# )
+# 
+# model <-  tractable_single_tract(
+#   df = df_z_male,
+#   tract = "Left.SLF",
+#   target = 'z'
+# )
+
+# model_summary = summary(model)
+# print(model_summary)
 
 source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
