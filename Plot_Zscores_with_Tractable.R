@@ -12,8 +12,8 @@ source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
-splits <-  88
+metric <-  "fa"
+splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
 # read data file
@@ -87,10 +87,10 @@ cat(significant_tracts_female, sep = "\n")
 
 if (metric == "md") {
   tractnames = c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
-  plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f")
+  plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f", 6.667, 3.333)
   tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
                 "Right.Arcuate", 
                 "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
-  plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only")
+  plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10)
 }
 
