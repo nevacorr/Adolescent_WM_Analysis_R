@@ -12,8 +12,8 @@ source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
-splits <-  100
+metric <-  "md"
+splits <-  88
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
 # read data file
@@ -47,18 +47,18 @@ df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
 # # Run tractable_single_tract() for each tract and collect stats
-results_df <-  run_tractable_single_tract_model(df_z, unique_tracts, 1)
-results_df <- apply_fdr_correction(results_df, "sex_p")
+output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric)
+results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
 print(results_df)
-results_df_male <-  run_tractable_single_tract_model(df_z_male, unique_tracts, 0)
-results_df_male <- apply_fdr_correction(results_df_male, "intercept_p")
+output_male <-  run_tractable_single_tract_model(df_z_male, unique_tracts, 0, metric)
+results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
 print(metric)
 print("with only male data")
 print(results_df_male)
-results_df_female <-  run_tractable_single_tract_model(df_z_female, unique_tracts, 0)
-results_df_female <- apply_fdr_correction(results_df_female, "intercept_p")
+output_female <-  run_tractable_single_tract_model(df_z_female, unique_tracts, 0, metric)
+results_df_female <- apply_fdr_correction(output_female$results_df, "intercept_p")
 print(metric)
 print("with only female data")
 print(results_df_female)
@@ -94,3 +94,7 @@ if (metric == "md") {
   plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10)
 }
 
+node_vals_male = output_male$node_pvalues
+node_vals_female = output_female$node_pvalues
+write.csv(node_vals_female, paste0(metric, "md_node_stats_female.csv"), row.names = FALSE)
+write.csv(node_vals_male, paste0(metric, "md_node_stats_male.csv"), row.names = FALSE)
