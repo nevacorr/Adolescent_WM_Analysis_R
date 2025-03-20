@@ -32,8 +32,8 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff) {
       save_figure = TRUE,
       ribbon_alpha = 0.20,
       group_pal = "Set1",
-      width=10,
-      height=10
+      width=6.667,
+      height=3.333
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
