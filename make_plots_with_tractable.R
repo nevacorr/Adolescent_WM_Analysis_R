@@ -19,7 +19,7 @@ plot_tracts <- function(df_z, sex){
   }
 }
 
-plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height) {
+plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height, metric) {
   if (sex==1) {
     plot_tract_profiles(
       df = df_z, 
@@ -35,7 +35,7 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
-    new_filename <- paste0("tracts_", metric,"_splits_", splits, "both_sexes_sig", title_suff,".png")
+    new_filename <- paste0("tracts_", metric,"_splits_", splits, title_suff,".png")
     file.rename(old_filename, new_filename)
   } else if (sex==0) {
     plot_tract_profiles(
@@ -50,8 +50,10 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height
     )    
     # Rename output file
     old_filename <- "tracts_param-z_profile.png"
-    new_filename <- paste0("tracts_", metric,"_splits_", splits, "_female_sig.png")
+    new_filename <- paste0("tracts_", metric,"_splits_", splits, title_suff, ".png")
     file.rename(old_filename, new_filename)
   }
 }
+
+
   
