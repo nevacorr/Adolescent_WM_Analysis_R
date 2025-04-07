@@ -387,7 +387,7 @@ spline_diff <- function(
 #'   units     = "in"
 #' )}
 #' @export
-plot_tract_profiles <- function (
+plot_tract_profiles_my_edit <- function (
     df,
     y, 
     tracts          = NULL,
