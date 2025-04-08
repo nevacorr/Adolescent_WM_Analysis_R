@@ -62,6 +62,7 @@ plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, wi
     plot_tract_profiles_my_edit(
       df = df_z, 
       y = "z", 
+      metric = metric,
       group_col = "sex",
       tracts = tractnames,
       n_groups = 2,
