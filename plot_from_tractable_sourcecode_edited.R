@@ -270,6 +270,9 @@ plot_tract_profiles_my_edit <- function (
         # Customize the axes and labels
         scale_x_continuous(name = "Position") +
         scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
+        # Add a horizontal black line at y = 0
+        geom_hline(yintercept = 0, color = "black", size = 1) +
+        
         facet_wrap(~ tracts) +
         theme_bw() +
         theme(
