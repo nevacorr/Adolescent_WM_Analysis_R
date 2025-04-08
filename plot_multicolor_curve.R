@@ -39,6 +39,7 @@ plot_colored_segments <- function(df, x_col, y_col, color_col) {
     scale_color_identity() +
     theme_minimal()
   
-  print(plot)
+  # print(plot)
+  return(segment_lines)
 }
 
