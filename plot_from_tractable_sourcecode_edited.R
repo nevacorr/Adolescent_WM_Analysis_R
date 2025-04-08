@@ -7,7 +7,6 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73",
                 "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-
 # Global Variables
 PALETTE_NAMES    <- c("cb", "cbb", "colorblind", "colorblind_black", 
                       rownames(RColorBrewer::brewer.pal.info))
