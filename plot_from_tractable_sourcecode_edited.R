@@ -1,3 +1,5 @@
+source("plot_multicolor_curve.R")
+
 # Use colorblind-friendly palette from http://jfly.iam.u-tokyo.ac.jp/color/
 # The palette with grey:
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
@@ -221,21 +223,74 @@ plot_tract_profiles_my_edit <- function (
         dplyr::group_by(x, group, tracts) %>% 
         dplyr::summarize(ribbon_func(y), .groups = "drop")
       
-      ####### Modified
- # create current metric figure handle
-      plot_handle <- df_curr %>%
-        ggplot2::ggplot(ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax,
-            group = group, color = group, fill = group)) +
-        ggplot2::geom_ribbon(color = NA, alpha = ribbon_alpha) +
-        ggplot2::geom_line(linewidth = linewidth) +
-        ggplot2::scale_x_continuous(name = "Position") +
-        ggplot2::scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
-        ggplot2::scale_color_manual(name = group_col, values = color_palette) +
-        ggplot2::scale_fill_manual(name = group_col, values = color_palette) +
-        ggplot2::facet_wrap(~ tracts) +
-        ggplot2::theme_bw()
+      df_curr <- df_curr %>%
+        dplyr::mutate(color_col = dplyr::case_when(
+          group == "F" ~ "red",
+          group == "M" ~ "blue",
+        ))
+      
+      df_curr <- df_curr %>%
+        dplyr::mutate(pvalue = rep(0:1, each = 10, length.out = n()))
+      
+      df_curr <- df_curr %>%
+        dplyr::mutate(color_col = dplyr::if_else(pvalue == 1, "yellow", color_col))
+      
+      df_f <- df_curr %>%
+        filter(group != "M")
+      
+      browser()
+      
+      plot_colored_segments(df_f, x_col="x", y_col="y", color_col="color_col")
+      
+      browser()
+      
+      # Create segment-wise data by pairing each (x, y) point with the next one
+      segments <- df_curr %>%
+        dplyr::group_by(group, tracts) %>%  # group before creating segments!
+        dplyr::mutate(
+          xend = lead(x), # Get the next x value for each row (used to define line segment ends)
+          yend = lead(y), # Get the next y value 
+          seg = row_number() # Assign a unique segment ID to each row
+        ) %>%
+          dplyr::ungroup() %>%
+          dplyr::filter(!is.na(xend))  # remove last NA row in each group
+      
+      browser()
+      
+      # Reshape segment data to long format for plotting with ggplot
+      segment_lines <- segments %>%
+        select(seg, group, color_col, tracts, x, y) %>% # Keep segment ID, group, color, tracts, and original point
+        rename(x1 = x, y1 = y) %>%        # Rename to represent first point in the segment
+        bind_rows(
+          segments %>%
+            select(seg, group, color_col, tracts, # Again keep segment ID, color, and tracts
+                   xend, yend) %>% # Select the end point of each segment
+            rename(x2 = xend, y2 = yend)         # Rename to represent second point in the segment
+        ) %>%
+        arrange(seg) %>%                  # Ensure data is ordered by segment
+        tidyr::pivot_longer(cols = c(x1, x2, y1, y2), # Reshape wide columns (x1, x2, y1, y2) into long format
+                            names_to = c(".value", "pt"), # Split names into 'x'/'y' and '1'/'2' for reshaping
+                            names_pattern = "(.)(.)") %>%  # Regex: first character is the variable name (x or y), second is the point number
+        arrange(seg, pt) # Ensure points within each segment are in correct order   
+      
+      browser()
+      ####### Modified from here
+      # create current metric figure handle
+      plot_handle <- ggplot(segment_lines, aes(x = x, y = y, group = group, color=color_col)) +
+        # Line plot
+        geom_line(linewidth = linewidth, aes(color = color_col)) + # Pass segment_lines here for lines
+        # Ribbon plot
+        geom_ribbon(data = segment_lines, aes(x = x, y = y, ymin = ymin, ymax = ymax, fill = color_col), 
+                    alpha = ribbon_alpha, color = NA) + # Pass segment_lines here for ribbon
+        # Customize the axes and labels
+        scale_x_continuous(name = "Position") +
+        scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
+        scale_fill_manual(name = group_col, values = color_palette) +
+        scale_color_manual(name = group_col, values = color_palette) +
+        facet_wrap(~ tracts) +
+        theme_bw() +
         ###### My added code to change top of axis
-        ggplot2::theme(
+        theme(
         strip.background = ggplot2::element_blank(),   # removes the rectangle around title
         strip.text = ggplot2::element_text(size = 16),  # makes the text larger
         axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
