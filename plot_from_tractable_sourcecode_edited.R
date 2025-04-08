@@ -56,248 +56,6 @@ tract_name <- function(tract_abbr) {
   return(name)
 }
 
-
-#' Plot GAM splines for each group
-#'
-#' @param gam_model GAM object, produced by gam/bam
-#' @param tract AFQ tract name
-#' @param df_tract A dataframe of AFQ nodes for certain tract
-#' @param dwi_metric Diffusion MRI metric (e.g. FA, MD)
-#' @param covariates List of strings of GAM covariates,
-#'     not including the smoothing terms over nodes and the random effect due
-#'     to subjectID.
-#' @param participant_id The name of the column that encodes participant ID
-#' @param group_by The grouping variable used to group nodeID smoothing terms
-#' @param output_dir directory in which to save plots
-#'
-#' @examples
-#' \dontrun{
-#' df_afq <- read.csv("/path/to/afq/output.csv")
-#' 
-#' gam_fit <- fit_gam(
-#'   df_afq,
-#'   target = "dti_fa",
-#'   covariates = list("group", "sex"),
-#'   family = "gamma",
-#'   k = 40
-#' )
-#' 
-#' plot_gam_splines(
-#'   gam_model = gam_fit,
-#'   tract = "OR",
-#'   df_tract = df_afq,
-#'   dwi_metric = "dti_fa",
-#'   covariates = c("group", "sex"),
-#'   output_dir = ".")}
-#' @export
-plot_gam_splines <- function(
-    gam_model,
-    tract,
-    df_tract,
-    dwi_metric,
-    covariates,
-    group_by       = "group",
-    participant_id = "subjectID",
-    output_dir
-) {
-  # generate predictions
-  values <- vector(mode = "list", length = length(covariates))
-  names(values) <- covariates
-  df_pred <- mgcv::predict.bam(
-    gam_model,
-    exclude_terms = c(covariates, "subjectID"),
-    values = values,
-    se.fit = T,
-    type = "response"
-  )
-
-  # convert predictions to dataframe
-  df_pred <- data.frame(
-    nodeID = df_tract$nodeID,
-    fit = df_pred$fit,
-    se.fit = df_pred$se.fit
-  )
-
-  for (covar in covariates) {
-    df_pred[[covar]] <- df_tract[[covar]]
-  }
-
-  if (!is.null(group_by)) {
-    df_pred[[group_by]] <- df_tract[[group_by]]
-  }
-
-  df_pred[[participant_id]] <- df_tract[[participant_id]]
-
-  # set up for plot
-  h_tract <- tract_name(tract)
-  h_title <- paste0("GAM fit of ", h_tract, " ", dwi_metric, " values")
-
-  # draw plot
-  options(warn = -1)
-  p <- ggplot2::ggplot(data = df_pred) +
-    ggplot2::geom_smooth(mapping = ggplot2::aes_string(
-      x = "nodeID", y = "fit", color = group_by
-    )) +
-    ggplot2::ggtitle(h_title) +
-    ggplot2::ylab(paste0("Fit ", dwi_metric)) +
-    ggplot2::xlab("Tract Node") +
-    ggplot2::theme(text = ggplot2::element_text(
-      family = "Times New Roman", face = "bold", size = 14
-    ))
-  options(warn = 0)
-
-  # Use colorblind palette for fills and lines
-  p + ggplot2::scale_color_manual(
-    values = cbbPalette,
-  )
-
-  plot_filename <- file.path(output_dir,
-                             paste0("plot_gam_", sub(" ", "_", tract), ".png"))
-
-  ggplot2::ggsave(
-    plot_filename,
-    units = "in",
-    width = 6,
-    height = 6,
-    device = "png"
-  )
-}
-
-#' Calculate and plot difference between two splines
-#'
-#' This function both
-#'   1) draws a spline-difference plot for 2 splines,
-#'   2) and returns a dataframe of differences at each node
-#'
-#' @param gam_model GAM object, produced by gam/bam
-#' @param tract AFQ tract name
-#' @param group_by The grouping variable used to group nodeID smoothing terms
-#' @param factor_a First group factor, string
-#' @param factor_b Second group factor, string
-#' @param save_output Boolean. If TRUE, save plot output
-#' @param sim.ci Logical: Using simultaneous confidence intervals or not
-#'   (default set to FALSE). The implementation of simultaneous CIs follows
-#'   Gavin Simpson's blog of December 15, 2016:
-#'   http://www.fromthebottomoftheheap.net/2016/12/15/simultaneous-interval-revisited/.
-#'   This interval is calculated from simulations based. Please specify a seed
-#'   (e.g., set.seed(123)) for reproducible results. Note: in contrast with
-#'   Gavin Simpson's code, here the Bayesian posterior covariance matrix of
-#'   the parameters is uncertainty corrected (unconditional=TRUE) to reflect
-#'   the uncertainty on the estimation of smoothness parameters.
-#' @param output_dir Directory in which to save plots
-#'
-#' @return A dataframe of spline differences at each node
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' df_afq <- read.csv("/path/to/afq/output.csv")
-#' 
-#' gam_fit <- fit_gam(
-#'   df_afq,
-#'   target = "dti_fa",
-#'   covariates = list("group", "sex"),
-#'   family = "gamma",
-#'   k = 40
-#' )
-#' 
-#' df_diff <- spline_diff(
-#'   gam_model = gam_fit,
-#'   tract = "OR",
-#'   factor_b = "1",
-#'   output_dir = "."
-#' )}
-spline_diff <- function(
-  gam_model,
-  tract,
-  group_by = "group",
-  factor_a,
-  factor_b,
-  save_output = TRUE,
-  sim.ci = FALSE,
-  output_dir = getwd()
-) {
-  # determine bottom of plot
-  comp <- list(c(factor_a, factor_b))
-  names(comp) <- c(group_by)
-
-  df_pair <- itsadug::plot_diff(
-    gam_model,
-    view = "nodeID",
-    comp = comp,
-    rm.ranef = TRUE,
-    plot = FALSE,
-    print.summary = FALSE,
-    sim.ci = sim.ci,
-    n.grid = 100,
-  )
-
-  h_min <- min(df_pair$est)
-  h_ci <- df_pair[which(df_pair$est == h_min), ]$CI
-  min_val <- h_min - h_ci
-
-  # add comparison column to df
-  df_pair$comp <- paste0(factor_a, "/", factor_b)
-
-  if (save_output) {
-    # set output
-    grDevices::png(
-      filename = file.path(output_dir, paste0(
-        "plot_diff_", sub(" ", "_", tract), "_pair.png"
-      )),
-      width = 600, height = 600
-    )
-
-    # draw plot
-    graphics::par(mar = c(5, 5, 4, 2), family = "Times New Roman")
-
-    p_summary <- utils::capture.output(itsadug::plot_diff(
-      gam_model,
-      view = "nodeID",
-      comp = comp,
-      # sim.ci = TRUE,
-      n.grid = 100,
-      rm.ranef = TRUE,
-      print.summary = TRUE,
-      main = paste0(tract, "Difference Scores, ", factor_a, "-", factor_b),
-      ylab = "Est. difference",
-      xlab = "Tract Node",
-      cex.lab = 2,
-      cex.axis = 2,
-      cex.main = 2,
-      cex.sub = 1.5,
-      col.diff = "red"
-    ))
-
-    # determine sig nodes
-    if (p_summary[14] != "Difference is not significant.") {
-      sig_regions <- p_summary[15:length(p_summary)]
-      sig_regions <- gsub("\\t", "", sig_regions)
-
-      # make list of start and end nodes, for shading
-      sig_list <- as.list(strsplit(sig_regions, " - "))
-      start_list <- as.numeric(sapply(sig_list, "[[", 1))
-      end_list <- as.numeric(sapply(sig_list, "[[", 2))
-
-      # shade significant regions
-      for (h_ind in 1:length(start_list)) {
-        graphics::polygon(
-          x = c(rep(start_list[h_ind],2), rep(end_list[h_ind], 2)),
-          y = c(0, min_val, min_val, 0),
-          col = grDevices::rgb(1, 0, 0, 0.2),
-          border = NA
-        )
-      }
-    }
-
-    graphics::par(mar = c(5, 4, 4, 2))
-    grDevices::dev.off()
-  }
-
-  return(df_pair)
-}
-
-
 #' Plot tract profiles
 #' 
 #' @description
@@ -352,41 +110,6 @@ spline_diff <- function(
 #' - If `group_col == NULL`, "tract_param-(y)_profiles.png"
 #' 
 #'
-#' @examples
-#' \dontrun{
-#' df_sarica <- read_afq_sarica(na_omit = TRUE)
-#'
-#' plot_handle <- plot_tract_profiles(
-#'   df        = df,
-#'   y         = c("fa", "md"),
-#'   tracts    = c("Left Corticospinal", "Right Corticospinal"),
-#'   width     = 12, 
-#'   height    = 6,
-#'   units     = "in"
-#' )
-#' 
-#' plot_handle <- plot_tract_profiles(
-#'   df        = df,
-#'   y         = c("fa", "md"),
-#'   tracts    = c("Left Corticospinal", "Right Corticospinal"),
-#'   group_col = "group", 
-#'   width     = 12, 
-#'   height    = 6,
-#'   units     = "in"
-#' )
-#'
-#' plot_handle <- plot_tract_profiles(
-#'   df        = df,
-#'   y         = "fa",
-#'   tracts    = c("Left Corticospinal", "Right Corticospinal"),
-#'   group_col = "age", 
-#'   n_groups  = 5, 
-#'   group_pal = "Spectral", 
-#'   width     = 12, 
-#'   height    = 6,
-#'   units     = "in"
-#' )}
-#' @export
 plot_tract_profiles_my_edit <- function (
     df,
     y, 
@@ -460,7 +183,7 @@ plot_tract_profiles_my_edit <- function (
 
   # prepare summarizing function 
   ribbon_func <- `_get_ribbon_func`(ribbon_func) # get ribbon function
-
+    
   plot_handles <- list() # initialize
   for (y_curr in y) { # for each y-axis variable
     if (is.null(group_col)) {
@@ -475,10 +198,16 @@ plot_tract_profiles_my_edit <- function (
         ggplot2::ggplot(ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax)) +
         ggplot2::geom_ribbon(color = NA, alpha = ribbon_alpha) +
         ggplot2::geom_line(linewidth = linewidth) + 
-        ggplot2::scale_x_continuous(name = "Node Position") + 
+        ggplot2::scale_x_continuous(name = "Position") + 
         ggplot2::scale_y_continuous(name = stringr::str_to_upper(y_curr)) + 
         ggplot2::facet_wrap(~ tracts) + 
-        ggplot2::theme_bw()
+        ggplot2::theme_bw() +
+        ###### My added code to change top of axis
+        ggplot2::theme(
+          strip..background = ggplot2::element_blank(),  #remove rectangle around plot title
+          strip.text = ggplot2::element_text(size=14, face="bold") # increase fontsize of title
+        ####################
+        )
 
       # prepare the saved figure file name
       output_fname <- sprintf("tracts_param-%s_profile.png", y_curr)
@@ -498,12 +227,24 @@ plot_tract_profiles_my_edit <- function (
           group = group, color = group, fill = group)) +
         ggplot2::geom_ribbon(color = NA, alpha = ribbon_alpha) +
         ggplot2::geom_line(linewidth = linewidth) + 
-        ggplot2::scale_x_continuous(name = "Node Position") + 
+        ggplot2::geom_hline(yintercept = 0.0, linewidth = 1, linetype = "solid", color = "black") + # bold line at 0
+        ggplot2::scale_x_continuous(name = "Position") + 
         ggplot2::scale_y_continuous(name = stringr::str_to_upper(y_curr)) + 
         ggplot2::scale_color_manual(name = group_col, values = color_palette) +
         ggplot2::scale_fill_manual(name = group_col, values = color_palette) +
         ggplot2::facet_wrap(~ tracts) + 
-        ggplot2::theme_bw()
+        ggplot2::theme_bw() +
+        ###### My added code to change top of axis
+        ggplot2::theme(
+        strip.background = ggplot2::element_blank(),   # removes the rectangle around title
+        strip.text = ggplot2::element_text(size = 16),  # makes the text larger
+        axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
+        axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
+        axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
+        axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
+        legend.text  = ggplot2::element_text(size = 16),   # larger legend text
+        legend.title = ggplot2::element_text(size = 18)    # larger legend title
+      )
   
       # prepare the saved figure file name
       output_fname <- sprintf("tracts_by-%s_param-%s_profile.png", group_col, y_curr)

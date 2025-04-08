@@ -1,4 +1,6 @@
 
+library(tractable)
+
 plot_tracts <- function(df_z, sex){
   if (sex == 1) {
     plot_tract_profiles(
@@ -55,5 +57,23 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height
   }
 }
 
-
-  
+plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, width, height, metric) {
+  if (sex==1) {
+    plot_tract_profiles_my_edit(
+      df = df_z, 
+      y = "z", 
+      group_col = "sex",
+      tracts = tractnames,
+      n_groups = 2,
+      save_figure = TRUE,
+      ribbon_alpha = 0.20,
+      group_pal = "Set1",
+      width=width,
+      height=height
+    )
+    # Rename output file
+    old_filename <- "tracts_by-sex_param-z_profile.png"
+    new_filename <- paste0("tracts_", metric,"_splits_", splits, title_suff,"_new_format.png")
+    file.rename(old_filename, new_filename)
+  }
+}
