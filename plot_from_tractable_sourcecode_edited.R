@@ -113,6 +113,7 @@ tract_name <- function(tract_abbr) {
 plot_tract_profiles_my_edit <- function (
     df,
     y, 
+    metric,
     tracts          = NULL,
     tract_col       = "tractID",
     node_col        = "nodeID", 
@@ -220,13 +221,47 @@ plot_tract_profiles_my_edit <- function (
         ) %>% 
         dplyr::group_by(x, group, tracts) %>% 
         dplyr::summarize(ribbon_func(y), .groups = "drop")
+      
+      # Prepare the data for plotting the normal (non-yellow) lines
+      df_normal <- df_curr %>% 
+        dplyr::mutate(
+          line_color = dplyr::case_when(
+            metric == "md" & y >= 0 ~ as.character(group),  # Normal color if 'md' and y >= 0
+            metric == "fa" & y <= 0 ~ as.character(group),  # Normal color if 'fa' and y <= 0
+            TRUE ~ as.character(group)                      # Default to original group color
+          )
+        ) %>%
+        dplyr::filter(is.na(line_color) | line_color != "yellow")  # Remove yellow-colored rows
+      
+      # Prepare the data for plotting the yellow lines (for each group)
+      df_yellow <- df_curr %>% 
+        dplyr::mutate(
+          line_color = dplyr::case_when(
+            metric == "md" & y < 0 ~ "yellow",  # Yellow if 'md' and y < 0
+            metric == "fa" & y > 0 ~ "yellow",  # Yellow if 'fa' and y > 0
+            TRUE ~ NA_character_               # No color for other points
+          )
+        ) %>%
+        dplyr::filter(!is.na(line_color))  # Only keep rows where the color is yellow
+
+      #######
   
       # create current metric figure handle
       plot_handle <- df_curr %>% 
         ggplot2::ggplot(ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax, 
           group = group, color = group, fill = group)) +
         ggplot2::geom_ribbon(color = NA, alpha = ribbon_alpha) +
-        ggplot2::geom_line(linewidth = linewidth) + 
+        
+        # Plot the normal lines (without the yellow parts)
+        ggplot2::geom_line(data = df_normal, 
+                           mapping = ggplot2::aes(x = x, y = y, group = group), 
+                           linewidth = linewidth) + 
+        
+        # Plot the yellow lines (for each group)
+        ggplot2::geom_line(data = df_yellow, 
+                           mapping = ggplot2::aes(x = x, y = y, group = group), 
+                           color = "yellow", linewidth = linewidth) + 
+        
         ggplot2::geom_hline(yintercept = 0.0, linewidth = 1, linetype = "solid", color = "black") + # bold line at 0
         ggplot2::scale_x_continuous(name = "Position") + 
         ggplot2::scale_y_continuous(name = stringr::str_to_upper(y_curr)) + 
