@@ -244,39 +244,44 @@ plot_tract_profiles_my_edit <- function (
       segment_lines_f = plot_colored_segments(df_f, x_col="x", y_col="y", color_col="color_col")
       segment_lines_m = plot_colored_segments(df_m, x_col="x", y_col="y", color_col="color_col")
       
-      browser()
+      # # Dummy data for legend
+      # legend_df <- data.frame(
+      #   x = c(1, 2),
+      #   y = c(1, 1),
+      #   sex = factor(c("female", "male"), levels = c("female", "male"))
+      #   group = c("f", "m")  # to satisfy the 'group' aesthetic
+      # )
       
-      ####### Modified from here
       # create current metric figure handle
       plot_handle <- ggplot(data = segment_lines_f, aes(x = x, y = y, group = group, color = color_col)) +
         geom_line(linewidth = 1.2, show.legend=FALSE) +
-        scale_color_identity() +
+
         geom_line(data = segment_lines_m, aes(x = x, y = y, group = group, color = color_col), linewidth = 1.2, show.legend=FALSE) +
+        
+        scale_color_identity() +
+        
         # Plot the ribbons for males
         geom_ribbon(data = df_curr %>% filter(group == "M"), aes(x = x, ymin = ymin, ymax = ymax), 
                     fill = "blue", color = NA, alpha = 0.2) +
         # Plot the ribbons for females
         geom_ribbon(data = df_curr %>% filter(group == "F"), aes(x = x, ymin = ymin, ymax = ymax), 
-                    fill = "red", color = NA, alpha = 0.2) 
+                    fill = "red", color = NA, alpha = 0.2) +
+        
         # Customize the axes and labels
-        # scale_x_continuous(name = "Position") +
-        # scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
-        # scale_fill_manual(name = "Sex", values = c("female" = "red", "male" = "blue")) +
-        # Customize ribbon legend to show line symbols instead of colored squares
-    #    guides(fill = guide_legend(override.aes = list(linetype = 1, shape = NA))) +
-        # facet_wrap(~ tracts) +
-        # theme_bw() +
-        ###### My added code to change top of axis
-        # theme(
-        # strip.background = ggplot2::element_blank(),   # removes the rectangle around title
-        # strip.text = ggplot2::element_text(size = 16),  # makes the text larger
-        # axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
-        # axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
-        # axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
-        # axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
-        # legend.text  = ggplot2::element_text(size = 16),   # larger legend text
-        # legend.title = ggplot2::element_text(size = 18)    # larger legend title
-        # )
+        scale_x_continuous(name = "Position") +
+        scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
+        facet_wrap(~ tracts) +
+        theme_bw() +
+        theme(
+        strip.background = ggplot2::element_blank(),   # removes the rectangle around title
+        strip.text = ggplot2::element_text(size = 16),  # makes the text larger
+        axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
+        axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
+        axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
+        axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
+        legend.text  = ggplot2::element_text(size = 16),   # larger legend text
+        legend.title = ggplot2::element_text(size = 18)    # larger legend title
+        )
       
       # prepare the saved figure file name
       output_fname <- sprintf("tracts_by-%s_param-%s_profile.png", group_col, y_curr)
@@ -290,7 +295,7 @@ plot_tract_profiles_my_edit <- function (
         ...      = ...
       )  
     }
-
+    
     # collect plot handles by metric
     plot_handles <- c(plot_handles, list(plot_handle))
   }
