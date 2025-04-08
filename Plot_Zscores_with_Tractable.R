@@ -10,9 +10,11 @@ source("load_multinode_tract_data.R")
 source("make_plots_with_tractable.R")
 source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
+source("plot_from_tractable_sourcecode_edited.R")
+
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "mpf"
+metric <-  "md"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -46,8 +48,15 @@ df_z <- df_z %>% filter(!is.na(z))
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
+# Plot each tract individually
+df_z_for_prof_plots = df_z
+df_z_for_prof_plots$tractID <- gsub("\\.", " ", df_z_for_prof_plots$tractID)
+unique_tracts_for_plots <- unique(df_z_for_prof_plots$tractID)
+for (t in unique_tracts_for_plots) {
+  plot_specific_tracts_new_format(df_z_for_prof_plots, t, 1, t, 5, 4, metric)
+}
+
 # # Run tractable_single_tract() for each tract and collect stats
-output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric)
 results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
@@ -92,9 +101,7 @@ tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
                 "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
 plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
 
-for (t in unique_tracts) {
-  plot_specific_tracts(df_z, t, 1, t, 5, 5, metric)
-}
+
 
 node_vals_male = output_male$node_pvalues
 node_vals_female = output_female$node_pvalues
