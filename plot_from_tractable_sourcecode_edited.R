@@ -238,68 +238,45 @@ plot_tract_profiles_my_edit <- function (
       df_f <- df_curr %>%
         filter(group != "M")
       
-      browser()
+      df_m <- df_curr %>%
+        filter(group != "F")
       
-      plot_colored_segments(df_f, x_col="x", y_col="y", color_col="color_col")
-      
-      browser()
-      
-      # Create segment-wise data by pairing each (x, y) point with the next one
-      segments <- df_curr %>%
-        dplyr::group_by(group, tracts) %>%  # group before creating segments!
-        dplyr::mutate(
-          xend = lead(x), # Get the next x value for each row (used to define line segment ends)
-          yend = lead(y), # Get the next y value 
-          seg = row_number() # Assign a unique segment ID to each row
-        ) %>%
-          dplyr::ungroup() %>%
-          dplyr::filter(!is.na(xend))  # remove last NA row in each group
+      segment_lines_f = plot_colored_segments(df_f, x_col="x", y_col="y", color_col="color_col")
+      segment_lines_m = plot_colored_segments(df_m, x_col="x", y_col="y", color_col="color_col")
       
       browser()
       
-      # Reshape segment data to long format for plotting with ggplot
-      segment_lines <- segments %>%
-        select(seg, group, color_col, tracts, x, y) %>% # Keep segment ID, group, color, tracts, and original point
-        rename(x1 = x, y1 = y) %>%        # Rename to represent first point in the segment
-        bind_rows(
-          segments %>%
-            select(seg, group, color_col, tracts, # Again keep segment ID, color, and tracts
-                   xend, yend) %>% # Select the end point of each segment
-            rename(x2 = xend, y2 = yend)         # Rename to represent second point in the segment
-        ) %>%
-        arrange(seg) %>%                  # Ensure data is ordered by segment
-        tidyr::pivot_longer(cols = c(x1, x2, y1, y2), # Reshape wide columns (x1, x2, y1, y2) into long format
-                            names_to = c(".value", "pt"), # Split names into 'x'/'y' and '1'/'2' for reshaping
-                            names_pattern = "(.)(.)") %>%  # Regex: first character is the variable name (x or y), second is the point number
-        arrange(seg, pt) # Ensure points within each segment are in correct order   
-      
-      browser()
       ####### Modified from here
       # create current metric figure handle
-      plot_handle <- ggplot(segment_lines, aes(x = x, y = y, group = group, color=color_col)) +
-        # Line plot
-        geom_line(linewidth = linewidth, aes(color = color_col)) + # Pass segment_lines here for lines
-        # Ribbon plot
-        geom_ribbon(data = segment_lines, aes(x = x, y = y, ymin = ymin, ymax = ymax, fill = color_col), 
-                    alpha = ribbon_alpha, color = NA) + # Pass segment_lines here for ribbon
+      plot_handle <- ggplot(data = segment_lines_f, aes(x = x, y = y, group = group, color = color_col)) +
+        geom_line(linewidth = 1.2, show.legend=FALSE) +
+        scale_color_identity() +
+        geom_line(data = segment_lines_m, aes(x = x, y = y, group = group, color = color_col), linewidth = 1.2, show.legend=FALSE) +
+        # Plot the ribbons for males
+        geom_ribbon(data = df_curr %>% filter(group == "M"), aes(x = x, ymin = ymin, ymax = ymax), 
+                    fill = "blue", color = NA, alpha = 0.2) +
+        # Plot the ribbons for females
+        geom_ribbon(data = df_curr %>% filter(group == "F"), aes(x = x, ymin = ymin, ymax = ymax), 
+                    fill = "red", color = NA, alpha = 0.2) 
         # Customize the axes and labels
-        scale_x_continuous(name = "Position") +
-        scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
-        scale_fill_manual(name = group_col, values = color_palette) +
-        scale_color_manual(name = group_col, values = color_palette) +
-        facet_wrap(~ tracts) +
-        theme_bw() +
+        # scale_x_continuous(name = "Position") +
+        # scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
+        # scale_fill_manual(name = "Sex", values = c("female" = "red", "male" = "blue")) +
+        # Customize ribbon legend to show line symbols instead of colored squares
+    #    guides(fill = guide_legend(override.aes = list(linetype = 1, shape = NA))) +
+        # facet_wrap(~ tracts) +
+        # theme_bw() +
         ###### My added code to change top of axis
-        theme(
-        strip.background = ggplot2::element_blank(),   # removes the rectangle around title
-        strip.text = ggplot2::element_text(size = 16),  # makes the text larger
-        axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
-        axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
-        axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
-        axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
-        legend.text  = ggplot2::element_text(size = 16),   # larger legend text
-        legend.title = ggplot2::element_text(size = 18)    # larger legend title
-        )
+        # theme(
+        # strip.background = ggplot2::element_blank(),   # removes the rectangle around title
+        # strip.text = ggplot2::element_text(size = 16),  # makes the text larger
+        # axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
+        # axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
+        # axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
+        # axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
+        # legend.text  = ggplot2::element_text(size = 16),   # larger legend text
+        # legend.title = ggplot2::element_text(size = 18)    # larger legend title
+        # )
       
       # prepare the saved figure file name
       output_fname <- sprintf("tracts_by-%s_param-%s_profile.png", group_col, y_curr)
