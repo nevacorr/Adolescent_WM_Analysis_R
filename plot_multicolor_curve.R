@@ -20,11 +20,11 @@ plot_colored_segments <- function(df, x_col, y_col, color_col) {
   
   # Reshape to long format: one row per point in each segment
   segment_lines <- segments %>%
-    select(group, !!color_col, !!x_col, !!y_col) %>%
+    select(group, !!color_col, !!x_col, !!y_col, tracts) %>%
     rename(x1 = !!x_col, y1 = !!y_col) %>%
     bind_rows(
       segments %>%
-        select(group, !!color_col, x = xend, y = yend) %>%
+        select(group, !!color_col, x = xend, y = yend, tracts) %>%
         rename(x2 = x, y2 = y)
     ) %>%
     arrange(group) %>%
