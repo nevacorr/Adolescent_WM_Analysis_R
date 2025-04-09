@@ -92,8 +92,6 @@ tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
                 "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
 plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
 
-
-
 node_vals_male = output_male$node_pvalues
 node_vals_female = output_female$node_pvalues
 write.csv(node_vals_female, paste0(metric, "_node_stats_female.csv"), row.names = FALSE)
