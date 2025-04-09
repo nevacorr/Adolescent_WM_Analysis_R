@@ -266,7 +266,7 @@ plot_tract_profiles_my_edit <- function (
         
         # Customize the axes and labels
         scale_x_continuous(name = x_axis_string) +
-        scale_y_continuous(name = stringr::str_to_upper(y_curr), limits = c(-1.2, 0.7)) +
+        scale_y_continuous(name = stringr::str_to_upper(y_curr), limits = c(-1.2, 0.8)) +
         
         # Add a horizontal black line at y = 0
         geom_hline(yintercept = 0, color = "black", size = 1) +
