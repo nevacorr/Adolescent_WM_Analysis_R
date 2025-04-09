@@ -115,6 +115,7 @@ plot_tract_profiles_my_edit <- function (
     df,
     y, 
     metric,
+    pvalues,
     tracts          = NULL,
     tract_col       = "tractID",
     node_col        = "nodeID", 
@@ -204,11 +205,9 @@ plot_tract_profiles_my_edit <- function (
         ggplot2::scale_y_continuous(name = stringr::str_to_upper(y_curr)) + 
         ggplot2::facet_wrap(~ tracts) + 
         ggplot2::theme_bw() +
-        ###### My added code to change top of axis
         ggplot2::theme(
           strip..background = ggplot2::element_blank(),  #remove rectangle around plot title
           strip.text = ggplot2::element_text(size=14, face="bold") # increase fontsize of title
-        ####################
         )
 
       # prepare the saved figure file name
@@ -229,11 +228,16 @@ plot_tract_profiles_my_edit <- function (
           group == "M" ~ "blue",
         ))
       
-      df_curr <- df_curr %>%
-        dplyr::mutate(pvalue = rep(0:1, each = 10, length.out = n()))
+      # add pvalues to df_curr
+      df_curr <- df_curr %>% 
+        left_join(
+          pvalues,
+          by = c("x"="Node", "group"="sex")
+        ) %>% 
+        rename(pvalue = adjusted_p_value)
       
-      df_curr <- df_curr %>%
-        dplyr::mutate(color_col = dplyr::if_else(pvalue == 1, "yellow", color_col))
+     df_curr <- df_curr %>%
+       dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, "yellow", color_col))
       
       df_f <- df_curr %>%
         filter(group != "M")
@@ -244,14 +248,6 @@ plot_tract_profiles_my_edit <- function (
       segment_lines_f = plot_colored_segments(df_f, x_col="x", y_col="y", color_col="color_col")
       segment_lines_m = plot_colored_segments(df_m, x_col="x", y_col="y", color_col="color_col")
       
-      # # Dummy data for legend
-      # legend_df <- data.frame(
-      #   x = c(1, 2),
-      #   y = c(1, 1),
-      #   sex = factor(c("female", "male"), levels = c("female", "male"))
-      #   group = c("f", "m")  # to satisfy the 'group' aesthetic
-      # )
-      
       # create current metric figure handle
       plot_handle <- ggplot(data = segment_lines_f, aes(x = x, y = y, group = group, color = color_col)) +
         geom_line(linewidth = 1.2, show.legend=FALSE) +
@@ -261,11 +257,11 @@ plot_tract_profiles_my_edit <- function (
         scale_color_identity() +
         
         # Plot the ribbons for males
-        geom_ribbon(data = df_curr %>% filter(group == "M"), aes(x = x, ymin = ymin, ymax = ymax), 
-                    fill = "blue", color = NA, alpha = 0.2) +
-        # Plot the ribbons for females
-        geom_ribbon(data = df_curr %>% filter(group == "F"), aes(x = x, ymin = ymin, ymax = ymax), 
-                    fill = "red", color = NA, alpha = 0.2) +
+        # geom_ribbon(data = df_curr %>% filter(group == "M"), aes(x = x, ymin = ymin, ymax = ymax), 
+        #             fill = "blue", color = NA, alpha = 0.2) +
+        # # Plot the ribbons for females
+        # geom_ribbon(data = df_curr %>% filter(group == "F"), aes(x = x, ymin = ymin, ymax = ymax), 
+        #             fill = "red", color = NA, alpha = 0.2) +
         
         # Customize the axes and labels
         scale_x_continuous(name = "Position") +
@@ -276,11 +272,14 @@ plot_tract_profiles_my_edit <- function (
         facet_wrap(~ tracts) +
         theme_bw() +
         theme(
+        panel.grid = element_blank(),    # removes grid
+        axis.text.x = element_blank(),   # removes x tick labels
+        axis.ticks.x = element_blank(),  # removes the x-axis ticks (marks)
         strip.background = ggplot2::element_blank(),   # removes the rectangle around title
         strip.text = ggplot2::element_text(size = 16),  # makes the text larger
         axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
         axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
-        axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
+        # axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
         axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
         legend.text  = ggplot2::element_text(size = 16),   # larger legend text
         legend.title = ggplot2::element_text(size = 18)    # larger legend title

@@ -57,12 +57,13 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height
   }
 }
 
-plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, width, height, metric) {
+plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, width, height, metric, pvalues) {
   if (sex==1) {
     plot_tract_profiles_my_edit(
       df = df_z, 
       y = "z", 
       metric = metric,
+      pvalues = pvalues, 
       group_col = "sex",
       tracts = tractnames,
       n_groups = 2,
