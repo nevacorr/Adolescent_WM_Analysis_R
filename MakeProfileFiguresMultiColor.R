@@ -12,7 +12,7 @@ source("plot_from_tractable_sourcecode_edited.R")
 source("helper_functions.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -67,8 +67,24 @@ unique_tracts_for_plots <- unique(df_z_for_prof_plots$tractID)
 
 for (t in unique_tracts_for_plots) {
   print(t)
+  
+  df_z_tract <- df_z_for_prof_plots %>%
+    filter(grepl(t, tractID))
+  
+  if (t %in% c('Right Arcuate', 'Right Thalamic Radiation', 'Left IFOF', 'Left ILF', 'Left SLF', 'Left Uncinate')) {
+    flip <- 1
+  } else if (t %in% c('Left Arcuate', 'Left Thalamic Radiation', 'Right IFOF', 'Right ILF', 'Right SLF', 'Right Uncinate', 'Left Corticospinal', 'Right Corticospinal', 'Callosum Forceps Major', 'Callosum Forceps Minor')) {
+    flip <- 0
+  }
+  
+  if (flip == 1) {
+    df_z_tract <- df_z_tract %>% 
+      mutate(nodeID = 59 - nodeID)
+  }
+  
   x_axis_string <- get_x_axis_string(t)
   pvalues_for_tract <- allpvalues %>% filter(Tract== t)
-  plot_specific_tracts_new_format(df_z_for_prof_plots, t, 1, t, 5, 4, 
+  
+  plot_specific_tracts_new_format(df_z_tract, t, 1, t, 5, 4, 
                                   metric, pvalues_for_tract, x_axis_string)
 }
