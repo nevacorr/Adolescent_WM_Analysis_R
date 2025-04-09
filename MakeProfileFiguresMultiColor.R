@@ -59,7 +59,7 @@ df_z <- df_z %>% filter(!is.na(z))
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
-# Plot each tract individually - z scores with sig pvales highlighted
+# Plot each tract individually - z scores with sig pvalues highlighted
 
 df_z_for_prof_plots = df_z
 df_z_for_prof_plots$tractID <- gsub("\\.", " ", df_z_for_prof_plots$tractID)
