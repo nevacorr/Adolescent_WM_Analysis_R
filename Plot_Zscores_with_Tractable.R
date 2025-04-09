@@ -13,7 +13,7 @@ source("apply_fdr_correction.R")
 source("plot_from_tractable_sourcecode_edited.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -48,6 +48,7 @@ df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
 # # Run tractable_single_tract() for each tract and collect stats
+output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric)
 results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
