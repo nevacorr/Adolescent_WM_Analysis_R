@@ -116,6 +116,7 @@ plot_tract_profiles_my_edit <- function (
     y, 
     metric,
     pvalues,
+    x_axis_string,
     tracts          = NULL,
     tract_col       = "tractID",
     node_col        = "nodeID", 
@@ -264,7 +265,7 @@ plot_tract_profiles_my_edit <- function (
         #             fill = "red", color = NA, alpha = 0.2) +
         
         # Customize the axes and labels
-        scale_x_continuous(name = "Position") +
+        scale_x_continuous(name = x_axis_string) +
         scale_y_continuous(name = stringr::str_to_upper(y_curr)) +
         # Add a horizontal black line at y = 0
         geom_hline(yintercept = 0, color = "black", size = 1) +
