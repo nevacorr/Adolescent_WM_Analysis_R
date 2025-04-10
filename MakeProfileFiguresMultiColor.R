@@ -71,6 +71,9 @@ for (t in unique_tracts_for_plots) {
   df_z_tract <- df_z_for_prof_plots %>%
     filter(grepl(t, tractID))
   
+  x_axis_string <- get_x_axis_string(t)
+  pvalues_for_tract <- allpvalues %>% filter(Tract== t)
+  
   if (t %in% c('Right Arcuate', 'Right Thalamic Radiation', 'Left IFOF', 'Left ILF', 'Left SLF', 'Left Uncinate')) {
     flip <- 1
   } else if (t %in% c('Left Arcuate', 'Left Thalamic Radiation', 'Right IFOF', 'Right ILF', 'Right SLF', 'Right Uncinate', 'Left Corticospinal', 'Right Corticospinal', 'Callosum Forceps Major', 'Callosum Forceps Minor')) {
@@ -80,10 +83,10 @@ for (t in unique_tracts_for_plots) {
   if (flip == 1) {
     df_z_tract <- df_z_tract %>% 
       mutate(nodeID = 59 - nodeID)
+    
+    pvalues_for_tract <- pvalues_for_tract %>% 
+      mutate(Node = 59 - Node)
   }
-  
-  x_axis_string <- get_x_axis_string(t)
-  pvalues_for_tract <- allpvalues %>% filter(Tract== t)
   
   plot_specific_tracts_new_format(df_z_tract, t, 1, t, 5, 4, 
                                   metric, pvalues_for_tract, x_axis_string)
