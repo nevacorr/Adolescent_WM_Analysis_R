@@ -238,7 +238,7 @@ plot_tract_profiles_my_edit <- function (
         rename(pvalue = adjusted_p_value)
       
      df_curr <- df_curr %>%
-       dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, "yellow", color_col))
+       dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, "green", color_col))
       
       df_f <- df_curr %>%
         filter(group != "M")
