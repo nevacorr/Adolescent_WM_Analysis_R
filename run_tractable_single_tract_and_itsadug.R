@@ -10,6 +10,10 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     tract = character(),
     intercept_p = numeric(),
     sex_p = numeric(),
+    female_estimate = numeric(),
+    female_p = numeric(),
+    male_estimate = numeric(),
+    male_p = numeric(),
     stringsAsFactors = FALSE
   )
   
@@ -68,13 +72,6 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       male_p = round(male_p, 4)
     ))
     
-    results_df <- results_df %>%
-      mutate(
-        female_p_fdr = p.adjust(female_p, method = "fdr"),
-        male_p_fdr = p.adjust(male_p, method = "fdr"),
-        sex_p_fdr = p.adjust(sex_p, method = "fdr")
-      )
-    
     # Predict on full tract data
     pred <- predict(model, newdata = tract_data, type = "response", se.fit = TRUE)
     
@@ -94,6 +91,14 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     # Append to full results
     node_pvalues <- rbind(node_pvalues, fs_data)
   }
+  
+  results_df <- results_df %>%
+    mutate(
+      female_p_fdr = p.adjust(female_p, method = "fdr"),
+      male_p_fdr = p.adjust(male_p, method = "fdr"),
+      sex_p_fdr = p.adjust(sex_p, method = "fdr")
+    )
+  
   
   # Apply FDR correction per tract and separately for each sex
   node_pvalues <- node_pvalues %>%
