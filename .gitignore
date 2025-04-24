@@ -7,3 +7,6 @@ test.R
 *.png
 *.csv
 *.xcf
+Plot_Zscores_with_Tractable.R
+run_tractable_single_tract_model.R
+test_plot_tractable_node_locations.R
