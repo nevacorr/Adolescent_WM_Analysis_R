@@ -48,34 +48,28 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     print(model_summary)
     
     for (sex_value in c("M", "F")) {
-      fs <- plot_smooth(model,
-                        view = "nodeID",
-                        cond = list(sex = sex_value),
-                        rm.ranef = TRUE,
-                        return.fit = TRUE)
+      # Subset to data for this sex
+      sex_data <- tract_data[tract_data$sex == sex_value, ]
       
-      # Get fitted values and standard errors using predict()
-      pred <- predict(model, type = "response", se.fit = TRUE)
+      # Predict on this subset
+      pred <- predict(model, newdata = sex_data, type = "response", se.fit = TRUE)
       
-      # Ensure all data have the same length and nodeID is in the same order as the data
+      # Calculate p-values
+      p_vals <- 2 * (1 - pnorm(abs(pred$fit / pred$se.fit)))
+      
       fs_data <- data.frame(
-        nodeID = tract_data$nodeID,  # Use original nodeID from tract_data
-        fit = pred$fit,  # Get the fitted values from the model
-        se.fit = pred$se.fit,  # Get the standard errors from the model
-        tract = tract,
-        sex = sex_value
+        Node = sex_data$nodeID,
+        Fit = pred$fit,
+        SE = pred$se.fit,
+        P_value = p_vals,
+        Tract = tract,
+        Sex = sex_value
       )
       
-      # Check if lengths match before binding
-      if (length(fs_data$nodeID) == length(fs_data$fit) && length(fs_data$nodeID) == length(fs_data$se.fit)) {
-        node_pvalues <- rbind(node_pvalues, fs_data)
-      } else {
-        warning("Mismatch in lengths of nodeID, fit, and se.fit. Skipping this iteration.")
-      }
-      fs$p_value <- 2 * (1 - pnorm(abs(fs$fit / fs$se.fit)))
-      
-      node_pvalues <- rbind(node_pvalues, fs)
+      node_pvalues <- rbind(node_pvalues, fs_data)
     }
+    
+
   }
   
   # Apply FDR correction per tract and separately for each sex
