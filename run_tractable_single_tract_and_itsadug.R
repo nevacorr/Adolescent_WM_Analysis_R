@@ -35,9 +35,12 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
                  method = "REML")
 
     model_summary = summary(model)
+    
+    # Calculate p values for entire tract
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
     sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
     
+    # Store these statistics in a dataframe
     results_df <- rbind(results_df, data.frame(
       metric = metric,
       tract = tract,
@@ -45,31 +48,24 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       sex_p = round(sex_p_value, 3)
     ))
     
-    print(model_summary)
+    # Predict on full tract data
+    pred <- predict(model, newdata = tract_data, type = "response", se.fit = TRUE)
     
-    for (sex_value in c("M", "F")) {
-      # Subset to data for this sex
-      sex_data <- tract_data[tract_data$sex == sex_value, ]
-      
-      # Predict on this subset
-      pred <- predict(model, newdata = sex_data, type = "response", se.fit = TRUE)
-      
-      # Calculate p-values
-      p_vals <- 2 * (1 - pnorm(abs(pred$fit / pred$se.fit)))
-      
-      fs_data <- data.frame(
-        Node = sex_data$nodeID,
-        Fit = pred$fit,
-        SE = pred$se.fit,
-        P_value = p_vals,
-        Tract = tract,
-        Sex = sex_value
-      )
-      
-      node_pvalues <- rbind(node_pvalues, fs_data)
-    }
+    # Calculate p-values across all rows
+    p_vals <- 2 * (1 - pnorm(abs(pred$fit / pred$se.fit)))
     
-
+    # Combine predictions with input data (so you keep sex + nodeID info)
+    fs_data <- data.frame(
+      Node = tract_data$nodeID,
+      Fit = pred$fit,
+      SE = pred$se.fit,
+      P_value = p_vals,
+      Tract = tract,
+      Sex = tract_data$sex
+    )
+    
+    # Append to full results
+    node_pvalues <- rbind(node_pvalues, fs_data)
   }
   
   # Apply FDR correction per tract and separately for each sex
