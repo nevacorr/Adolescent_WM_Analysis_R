@@ -26,6 +26,7 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
   
   for (tract in unique_tracts) {
     # Filter for current tract
+    print(tract)
     tract_data <- df_z[df_z$tractID == tract, ]
     tract_data$nodeID <- as.numeric(tract_data$nodeID)
     
@@ -36,6 +37,21 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
 
     model_summary = summary(model)
     
+    print(model_summary)
+    
+    # For each sex, determine whether z scores across entire tract are significantly
+    # different from zero
+    female_estimate <- coef(model)["(Intercept)"]
+    female_se <- sqrt(vcov(model)["(Intercept)", "(Intercept)"])
+    female_p <- 2 * (1 - pnorm(abs(female_estimate / female_se)))
+    
+    male_estimate <- coef(model)["(Intercept)"] + coef(model)["sexM"]
+    male_se <- sqrt(sum(vcov(model)[c("(Intercept)", "sexM"), c("(Intercept)", "sexM")]))
+    male_p <- 2 * (1 - pnorm(abs(male_estimate / male_se)))
+    
+    cat(sprintf("Female z mean estimate: %.3f (p = %.4f)\n", female_estimate, female_p))
+    cat(sprintf("Male z mean estimate: %.3f (p = %.4f)\n\n", male_estimate, male_p))
+    
     # Calculate p values for entire tract
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
     sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
@@ -45,8 +61,19 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       metric = metric,
       tract = tract,
       intercept_p = round(intercept_p_value, 3),
-      sex_p = round(sex_p_value, 3)
+      sex_p = round(sex_p_value, 3),
+      female_estimate = round(female_estimate, 3),
+      female_p = round(female_p, 4),
+      male_estimate = round(male_estimate, 3),
+      male_p = round(male_p, 4)
     ))
+    
+    results_df <- results_df %>%
+      mutate(
+        female_p_fdr = p.adjust(female_p, method = "fdr"),
+        male_p_fdr = p.adjust(male_p, method = "fdr"),
+        sex_p_fdr = p.adjust(sex_p, method = "fdr")
+      )
     
     # Predict on full tract data
     pred <- predict(model, newdata = tract_data, type = "response", se.fit = TRUE)

@@ -13,7 +13,7 @@ source("apply_fdr_correction.R")
 source("plot_from_tractable_sourcecode_edited.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
+metric <-  "md"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -47,21 +47,16 @@ df_z <- df_z %>% filter(!is.na(z))
 # # Run tractable_single_tract() for each tract and collect stats
 output <-  run_tractable_single_tract_and_itsadug(df_z, unique_tracts, metric)
 print(metric)
-print("with sex as covariate")
-print(results_df)
+print(output$results_df)
 print("\n")
+print(output$node_pvalues)
 
-significant_tracts_sex_difference <- results_df %>%
-  filter(FDR_corrected <= 0.05) %>% 
-  pull(tract)
-
-print(paste("Tracts with significant post-covid sex differences in", metric, ":"))
-cat(significant_tracts_sex_difference, sep = "\n")
-
-tractnames = c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
-plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f", 6.667, 3.333, metric)
-tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
-                "Right.Arcuate", 
-                "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
-plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
+# significant_÷t_tracts_sex_difference, sep = "\n")
+# 
+# tractnames = c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
+# plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f", 6.667, 3.333, metric)
+# tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
+#                 "Right.Arcuate", 
+#                 "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
+# plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
 
