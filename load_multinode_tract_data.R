@@ -12,7 +12,7 @@ reformat_data <- function(z_orig) {
     ) %>%
     mutate(nodeID = as.integer(nodeID) - 21) # Renumber nodes so they start at 0 
   
-  # add gender and sex columns and compute values for every row
+  # add age and sex columns and compute values for every row
   z_df <- z_df %>% 
     mutate(
       age = case_when(
