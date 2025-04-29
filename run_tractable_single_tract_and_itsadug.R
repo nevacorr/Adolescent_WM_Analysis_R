@@ -21,8 +21,6 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
   node_pvalues <- data.frame(
     Node = integer(), 
     P_value = numeric(), 
-    Fit = numeric(),
-    SE = numeric(),
     Tract = character(),
     Sex = character(),
     stringsAsFactors = FALSE
@@ -31,6 +29,7 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
   for (tract in unique_tracts) {
     # Filter for current tract
     print(tract)
+    
     tract_data <- df_z[df_z$tractID == tract, ]
     tract_data$nodeID <- as.numeric(tract_data$nodeID)
     
@@ -71,25 +70,44 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       male_estimate = round(male_estimate, 3),
       male_p = round(male_p, 4)
     ))
+ 
+    # === Get node-level smooth fits using itsadug ===
     
-    # Predict on full tract data
-    pred <- predict(model, newdata = tract_data, type = "response", se.fit = TRUE)
+    # Generate prediction data for each sex
+    nodes <- sort(unique(tract_data$nodeID))
+    pred_f <- data.frame(nodeID = nodes, sex = "F", subjectID = NA)
+    pred_m <- data.frame(nodeID = nodes, sex = "M", subjectID = NA)
     
-    # Calculate p-values across all rows
-    p_vals <- 2 * (1 - pnorm(abs(pred$fit / pred$se.fit)))
+    # Predict smooths for each sex
+    pred_f_out <- predict(model, newdata = pred_f, se.fit = TRUE, type = "response")
+    pred_m_out <- predict(model, newdata = pred_m, se.fit = TRUE, type = "response")
     
-    # Combine predictions with input data (so you keep sex + nodeID info)
-    fs_data <- data.frame(
-      Node = tract_data$nodeID,
-      Fit = pred$fit,
-      SE = pred$se.fit,
-      P_value = p_vals,
+    # Compute z and p values
+    z_f <- pred_f_out$fit / pred_f_out$se.fit
+    p_f <- 2 * (1 - pnorm(abs(z_f)))
+    
+    z_m <- pred_m_out$fit / pred_m_out$se.fit
+    p_m <- 2 * (1 - pnorm(abs(z_m)))
+    
+    # Assemble per-node results
+    fs_data_summary_f <- data.frame(
+      Node = nodes,
       Tract = tract,
-      Sex = tract_data$sex
+      Sex = "F",
+      P_value = p_f
     )
     
-    # Append to full results
-    node_pvalues <- rbind(node_pvalues, fs_data)
+    fs_data_summary_m <- data.frame(
+      Node = nodes,
+      Tract = tract,
+      Sex = "M",
+      P_value = p_m
+    )
+    
+    # Combine
+    fs_data_summary <- rbind(fs_data_summary_f, fs_data_summary_m)
+    
+    node_pvalues <- rbind(node_pvalues, fs_data_summary)
   }
   
   results_df <- results_df %>%
@@ -98,7 +116,6 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       male_p_fdr = p.adjust(male_p, method = "fdr"),
       sex_p_fdr = p.adjust(sex_p, method = "fdr")
     )
-  
   
   # Apply FDR correction per tract and separately for each sex
   node_pvalues <- node_pvalues %>%
