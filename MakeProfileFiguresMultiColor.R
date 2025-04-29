@@ -12,15 +12,15 @@ source("plot_from_tractable_sourcecode_edited.R")
 source("helper_functions.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
+metric <-  "md"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
+out_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
+tract_stats_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
 # Read in pvalue for significcant difference from pre-covid data for males and females
-male_pvalues = read.csv(paste0('/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files/',
-                               metric, "_node_stats_male.csv"))
-female_pvalues = read.csv(paste0('/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files/', 
-                                 metric, "_node_stats_female.csv"))
+male_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_male.csv")))
+female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_female.csv")))
 
 # add a column indicating sex
 male_pvalues$sex <- "M"
@@ -91,5 +91,5 @@ for (t in unique_tracts_for_plots) {
   }
   
   plot_specific_tracts_new_format(df_z_tract, t, 1, t, 5, 4, 
-                                  metric, pvalues_for_tract, x_axis_string)
+                                  metric, pvalues_for_tract, x_axis_string, out_path)
 }
