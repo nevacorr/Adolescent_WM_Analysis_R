@@ -51,12 +51,3 @@ print(output$results_df)
 print("\n")
 print(output$node_pvalues)
 
-# significant_÷t_tracts_sex_difference, sep = "\n")
-# 
-# tractnames = c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
-# plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f", 6.667, 3.333, metric)
-# tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
-#                 "Right.Arcuate", 
-#                 "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
-# plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
-
