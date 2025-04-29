@@ -58,7 +58,7 @@ plot_specific_tracts = function(df_z, tractnames, sex, title_suff, width, height
 }
 
 plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, width, 
-                                           height, metric, pvalues, x_axis_string) {
+                                           height, metric, pvalues, x_axis_string, outpath) {
   if (sex==1) {
     plot_tract_profiles_my_edit(
       df = df_z, 
@@ -77,7 +77,7 @@ plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, wi
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
-    new_filename <- paste0("tracts_", metric,"_splits_", splits, title_suff,"_new_format.png")
+    new_filename <- file.path(outpath, paste0("tracts_", metric,"_splits_", splits, title_suff,"_new_format.png"))
     file.rename(old_filename, new_filename)
   }
 }
