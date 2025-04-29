@@ -1,7 +1,7 @@
 
 library(tractable)
 
-plot_tracts <- function(df_z, sex){
+plot_tracts <- function(df_z, sex, path){
   if (sex == 1) {
     plot_tract_profiles(
       df = df_z, 
@@ -16,7 +16,7 @@ plot_tracts <- function(df_z, sex){
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
-    new_filename <- paste0("tracts_by-sex_", metric, "-z_profile_", splits, "splits_alltracts.png")
+    new_filename <- file.path(path, paste0("tracts_by-sex_", metric, "-z_profile_", splits, "splits_alltracts.png"))
     file.rename(old_filename, new_filename)
   }
 }
