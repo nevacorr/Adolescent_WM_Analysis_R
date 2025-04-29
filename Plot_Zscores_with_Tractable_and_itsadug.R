@@ -82,8 +82,11 @@ cat(significant_tracts_female, sep = "\n")
 node_vals = output$node_pvalues
 
 # Create separate data frames
-node_vals_female <- subset(node_vals, Sex == "F")
-node_vals_male <- subset(node_vals, Sex == "M")
+node_vals_female <- subset(node_vals, sex == "F")
+node_vals_male <- subset(node_vals, sex == "M")
+
+node_vals_female <- node_vals_female %>% select(-sex, -Metric)
+node_vals_male <- node_vals_male %>% select(-sex, -Metric)
 
 # Output file paths
 output_node_file_female <- file.path(output_stats_path, paste0(metric, "_node_stats_gam_female.csv"))
