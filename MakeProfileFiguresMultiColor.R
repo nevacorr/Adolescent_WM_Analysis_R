@@ -17,8 +17,10 @@ splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
 # Read in pvalue for significcant difference from pre-covid data for males and females
-male_pvalues = read.csv(paste0(metric, "_node_stats_male.csv"))
-female_pvalues = read.csv(paste0(metric, "_node_stats_female.csv"))
+male_pvalues = read.csv(paste0('/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files/',
+                               metric, "_node_stats_male.csv"))
+female_pvalues = read.csv(paste0('/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files/', 
+                                 metric, "_node_stats_female.csv"))
 
 # add a column indicating sex
 male_pvalues$sex <- "M"
