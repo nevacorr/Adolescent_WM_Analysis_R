@@ -20,7 +20,7 @@ reformat_data <- function(z_orig) {
         subjectID >= 200 & subjectID < 300 ~ 14,
         subjectID >= 300 & subjectID < 400 ~ 16
       ),
-      sex = if_else(subjectID %% 2 == 1, "M", "F") #If subject number is odd, sex is male, if even sex is female
+    sex = if_else(subjectID %% 2 == 1, "M", "F") #If subject number is odd, sex is male, if even sex is female
     )
   
   return(z_df)
