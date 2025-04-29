@@ -23,6 +23,7 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     P_value = numeric(), 
     Tract = character(),
     Sex = character(),
+    Metric = character(),
     stringsAsFactors = FALSE
   )
   
@@ -71,45 +72,58 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       male_p = round(male_p, 4)
     ))
  
-    # === Get node-level smooth fits using itsadug ===
+    # Calculate node-based statistics
+    # Separate data for females and males
+    female_data <- tract_data[tract_data$sex == "F", ]
+    male_data <- tract_data[tract_data$sex == "M", ]
     
-    # Generate prediction data for each sex
-    nodes <- sort(unique(tract_data$nodeID))
-    pred_f <- data.frame(nodeID = nodes, sex = "F", subjectID = NA)
-    pred_m <- data.frame(nodeID = nodes, sex = "M", subjectID = NA)
+    # Model for females: Treat nodeID as a factor
+    female_model <- gam(z ~ factor(nodeID) + s(subjectID, bs = "re"),
+                        data = female_data,
+                        method = "REML")
+    female_summary <- summary(female_model)
     
-    # Predict smooths for each sex
-    pred_f_out <- predict(model, newdata = pred_f, se.fit = TRUE, type = "response")
-    pred_m_out <- predict(model, newdata = pred_m, se.fit = TRUE, type = "response")
+    # Extract p-value for each node (factor level) in the model for females
+    # Each level of nodeID will have a separate test for significance
+    female_terms <- rownames(female_summary$p.table)
+    female_nodes <- gsub("factor\\(nodeID\\)", "", female_terms[grepl("factor\\(nodeID\\)", female_terms)])
+    female_node_p_values <- female_summary$p.table[grepl("factor\\(nodeID\\)", female_terms), "Pr(>|t|)"]
     
-    # Compute z and p values
-    z_f <- pred_f_out$fit / pred_f_out$se.fit
-    p_f <- 2 * (1 - pnorm(abs(z_f)))
+    # Store results for females
+    for (i in seq_along(female_node_p_values)) {
+      node_pvalues <- rbind(node_pvalues, data.frame(
+        Node = as.integer(female_nodes[i]),
+        P_value = female_node_p_values[i],
+        Tract = tract,
+        Sex = "F",
+        Metric = metric
+      ))
+    }
     
-    z_m <- pred_m_out$fit / pred_m_out$se.fit
-    p_m <- 2 * (1 - pnorm(abs(z_m)))
+    # Model for males: Treat nodeID as a factor
+    male_model <- gam(z ~ factor(nodeID) + s(subjectID, bs = "re"),
+                      data = male_data,
+                      method = "REML")
+    male_summary <- summary(male_model)
     
-    # Assemble per-node results
-    fs_data_summary_f <- data.frame(
-      Node = nodes,
-      Tract = tract,
-      Sex = "F",
-      P_value = p_f
-    )
+    # Extract p-value for each node (factor level) in the model for males
+    male_terms <- rownames(male_summary$p.table)
+    male_nodes <- gsub("factor\\(nodeID\\)", "", male_terms[grepl("factor\\(nodeID\\)", male_terms)])
+    male_node_p_values <- male_summary$p.table[grepl("factor\\(nodeID\\)", male_terms), "Pr(>|t|)"]
     
-    fs_data_summary_m <- data.frame(
-      Node = nodes,
-      Tract = tract,
-      Sex = "M",
-      P_value = p_m
-    )
-    
-    # Combine
-    fs_data_summary <- rbind(fs_data_summary_f, fs_data_summary_m)
-    
-    node_pvalues <- rbind(node_pvalues, fs_data_summary)
+    # Store results for males
+    for (i in seq_along(male_node_p_values)) {
+      node_pvalues <- rbind(node_pvalues, data.frame(
+        Node = as.integer(male_nodes[i]),
+        P_value = male_node_p_values[i],
+        Tract = tract,
+        Sex = "M",
+        Metric = metric
+      ))
+    }
   }
   
+  # FDR correction
   results_df <- results_df %>%
     mutate(
       female_p_fdr = p.adjust(female_p, method = "fdr"),
@@ -117,11 +131,7 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       sex_p_fdr = p.adjust(sex_p, method = "fdr")
     )
   
-  # Apply FDR correction per tract and separately for each sex
-  node_pvalues <- node_pvalues %>%
-    group_by(Tract, Sex) %>%
-    mutate(adjusted_p = p.adjust(P_value, method = "fdr")) %>%
-    ungroup()
+  node_pvalues$nodeID_p_fdr <- p.adjust(node_pvalues$P_value, method = "fdr")
   
   return(list(results_df = results_df, node_pvalues = node_pvalues))
   
