@@ -80,6 +80,16 @@ print(paste("Tracts with significantly different",metric,"values post-covid for 
 cat(significant_tracts_female, sep = "\n")
 
 node_vals = output$node_pvalues
-output_node_file = file.path(output_stats_path, paste0(metric, "_node_stats_gam.csv"))
-write.csv(node_vals, output_node_file, row.names = FALSE)
+
+# Create separate data frames
+node_vals_female <- subset(node_vals, Sex == "F")
+node_vals_male <- subset(node_vals, Sex == "M")
+
+# Output file paths
+output_node_file_female <- file.path(output_stats_path, paste0(metric, "_node_stats_gam_female.csv"))
+output_node_file_male <- file.path(output_stats_path, paste0(metric, "_node_stats_gam_male.csv"))
+
+# Write to CSV
+write.csv(node_vals_female, output_node_file_female, row.names = FALSE)
+write.csv(node_vals_male, output_node_file_male, row.names = FALSE)
 
