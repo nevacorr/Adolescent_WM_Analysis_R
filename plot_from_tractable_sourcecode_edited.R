@@ -235,7 +235,7 @@ plot_tract_profiles_my_edit <- function (
           pvalues,
           by = c("x"="Node", "group"="sex")
         ) %>% 
-        rename(pvalue = adjusted_p_value)
+        rename(pvalue = P_value)
       
      df_curr <- df_curr %>%
        dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, "green", color_col))
