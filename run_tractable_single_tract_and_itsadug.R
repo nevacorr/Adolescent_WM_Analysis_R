@@ -2,6 +2,8 @@ library(tractable)
 library(itsadug)
 library(mgcv)
 
+
+
 run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) {
   
   # Create dataframe to store p values for model for tracts
@@ -82,19 +84,36 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     male_data <- tract_data[tract_data$sex == "M", ]
     
     # Model for females: Treat nodeID as a factor and subject as a fixed effect
-    female_model <- gam(z ~ factor(nodeID) + s(subjectID, bs = "re"),
+    # Do not include intercept
+    female_model <- gam(z ~ -1 + factor(nodeID) + s(subjectID, bs = "re"),
                         data = female_data,
                         method = "REML")
+    
     female_summary <- summary(female_model)
     
-    # Extract p-value for each node in the model for females
-    # Each level of nodeID has a separate test for significance
-    female_terms <- rownames(female_summary$p.table)
-    female_nodes <- gsub("factor\\(nodeID\\)", "", female_terms[grepl("factor\\(nodeID\\)", female_terms)])
-    female_node_p_values <- female_summary$p.table[grepl("factor\\(nodeID\\)", female_terms), "Pr(>|t|)"]
+    print(female_summary)
     
-    # Calculate mean z for each node for females
-    female_mean_z <- tapply(female_data$z, female_data$nodeID, mean)
+    # Get parametric terms (node effects)
+    param_table <- as.data.frame(female_summary$p.table)
+    
+    # Extract nodeID numbers from row names like "factor(nodeID)0"
+    param_table$nodeID <- gsub("factor\\(nodeID\\)", "", rownames(param_table))
+    param_table$nodeID <- as.numeric(param_table$nodeID)
+    
+    # Rename columns
+    colnames(param_table)[1:4] <- c("Estimate", "StdError", "t_value", "p_value")
+    
+    # Mark significant nodes
+    param_table$significant <- param_table$p_value < 0.05
+    
+    p <- plot_nodewise_estimates(female_model, tract, title = "Female Node-wise z Estimates")
+    
+    print(p)
+    browser()
+    
+    female_node_p_values <- param_table$p_value
+    female_nodes <- param_table$nodeID
+    female_mean_z <- param_table$Estimate
     
     # Store results for females
     for (i in seq_along(female_node_p_values)) {
@@ -108,31 +127,33 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       ))
     }
     
+    p
+    
     # Model for males: Treat nodeID as a factor and subject as a fixed effect
-    male_model <- gam(z ~ factor(nodeID) + s(subjectID, bs = "re"),
-                      data = male_data,
-                      method = "REML")
-    male_summary <- summary(male_model)
-    
-    # Extract p-value for each node in the model for males
-    male_terms <- rownames(male_summary$p.table)
-    male_nodes <- gsub("factor\\(nodeID\\)", "", male_terms[grepl("factor\\(nodeID\\)", male_terms)])
-    male_node_p_values <- male_summary$p.table[grepl("factor\\(nodeID\\)", male_terms), "Pr(>|t|)"]
-    
-    # Calculate mean z for each node for males
-    male_mean_z <- tapply(male_data$z, male_data$nodeID, mean)
-    
-    # Store results for males
-    for (i in seq_along(male_node_p_values)) {
-      node_pvalues <- rbind(node_pvalues, data.frame(
-        Node = as.integer(male_nodes[i]),
-        P_value = male_node_p_values[i],
-        Tract = tract,
-        sex = "M",
-        Metric = metric,
-        Z_mean = male_mean_z[as.integer(male_nodes[i])] 
-      ))
-    }
+    # male_model <- gam(z ~ factor(nodeID) + s(subjectID, bs = "re"),
+    #                   data = male_data,
+    #                   method = "REML")
+    # male_summary <- summary(male_model)
+    # 
+    # # Extract p-value for each node in the model for males
+    # male_terms <- rownames(male_summary$p.table)
+    # male_nodes <- gsub("factor\\(nodeID\\)", "", male_terms[grepl("factor\\(nodeID\\)", male_terms)])
+    # male_node_p_values <- male_summary$p.table[grepl("factor\\(nodeID\\)", male_terms), "Pr(>|t|)"]
+    # 
+    # # Calculate mean z for each node for males
+    # male_mean_z <- tapply(male_data$z, male_data$nodeID, mean)
+    # 
+    # # Store results for males
+    # for (i in seq_along(male_node_p_values)) {
+    #   node_pvalues <- rbind(node_pvalues, data.frame(
+    #     Node = as.integer(male_nodes[i]),
+    #     P_value = male_node_p_values[i],
+    #     Tract = tract,
+    #     sex = "M",
+    #     Metric = metric,
+    #     Z_mean = male_mean_z[as.integer(male_nodes[i])] 
+    #   ))
+    # }
   }
   
   # correct tract statistics for multiple comparisons across tracts
@@ -144,10 +165,10 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     )
   
   # correct within each tract for node-level p-values
-  node_pvalues <- node_pvalues %>%
-    group_by(Tract) %>%
-    mutate(adjusted_p_value = p.adjust(P_value, method = "fdr")) %>%
-    ungroup()
+  # node_pvalues <- node_pvalues %>%
+  #   group_by(Tract) %>%
+  #   mutate(adjusted_p_value = p.adjust(P_value, method = "fdr")) %>%
+  #   ungroup()
   
   return(list(results_df = results_df, node_pvalues = node_pvalues))
   
