@@ -28,7 +28,7 @@ female_pvalues$sex <- "F"
 
 # concatenate male and female pvalue dataframes and remove column that are not needed
 allpvalues <- bind_rows(male_pvalues, female_pvalues)
-allpvalues <- allpvalues %>% select(-Z_mean, -P_value)
+allpvalues <- allpvalues %>% select(-Z_mean, -adjusted_p_value)
 
 # Replace '.' character with space for tract names
 allpvalues <- allpvalues %>%
