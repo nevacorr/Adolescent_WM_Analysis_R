@@ -11,6 +11,8 @@ source("make_plots_with_tractable.R")
 source("run_tractable_single_tract_and_itsadug.R")
 source("apply_fdr_correction.R")
 source("plot_from_tractable_sourcecode_edited.R")
+source("plot_gam_model.R")
+source("calculate_node_significance.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric <-  "md"
