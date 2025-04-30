@@ -1,6 +1,6 @@
 library(ggplot2)
 
-plot_nodewise_estimates <- function(model, tract, metric, title = "Node-wise z Estimates") {
+plot_nodewise_estimates <- function(model, tract, metric, sex, title = "Node-wise z Estimates") {
   # Extract parametric table
   model_summary <- summary(model)
   param_table <- as.data.frame(model_summary$p.table)
@@ -25,7 +25,7 @@ plot_nodewise_estimates <- function(model, tract, metric, title = "Node-wise z E
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
     scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red")) +
     labs(
-      title = paste(tract, metric, title),
+      title = paste(sex, tract, metric, title),
       x = "Node ID",
       y = "Estimated z",
       color = "Significant (p < 0.05)"
