@@ -20,11 +20,11 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
   # Create dataframe to store p-values for each node and tract
   node_pvalues <- data.frame(
     Node = integer(), 
+    Z_mean = numeric(),
     P_value = numeric(), 
     Tract = character(),
     sex = character(),
     Metric = character(),
-    Z_mean = numeric(),
     stringsAsFactors = FALSE
   )
   
@@ -92,10 +92,10 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       node_pvalues <- rbind(node_pvalues, data.frame(
         Node = as.integer(female_nodes[i]),
         P_value = female_node_p_values[i],
+        Z_mean = female_mean_z[i],
         Tract = tract,
         sex = "F",
-        Metric = metric,
-        Z_mean = female_mean_z[i]
+        Metric = metric
       ))
     }
     
@@ -110,10 +110,10 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
       node_pvalues <- rbind(node_pvalues, data.frame(
         Node = as.integer(male_nodes[i]),
         P_value = male_node_p_values[i],
+        Z_mean = male_mean_z[i],
         Tract = tract,
         sex = "M",
-        Metric = metric,
-        Z_mean = male_mean_z[i]
+        Metric = metric
       ))
     }
   }
