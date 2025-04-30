@@ -1,4 +1,4 @@
-calculate_node_significance <- function(tract_data, tract, metric, mystr){
+calculate_node_significance <- function(tract_data, tract, metric, sex){
   # Treat nodeID as a factor and subject as a fixed effect
   # Do not include intercept
   tract_model <- gam(z ~ -1 + factor(nodeID) + s(subjectID, bs = "re"),
@@ -22,7 +22,7 @@ calculate_node_significance <- function(tract_data, tract, metric, mystr){
   # Mark significant nodes
   param_table$significant <- param_table$p_value < 0.05
   
-  p <- plot_nodewise_estimates(tract_model, tract, metric)
+  p <- plot_nodewise_estimates(tract_model, tract, metric, sex)
   
   print(p)
   
