@@ -18,7 +18,7 @@ data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 out_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
 tract_stats_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
-# Read in pvalue for significcant difference from pre-covid data for males and females
+# Read in pvalue for significant difference from pre-covid data for males and females
 male_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_male.csv")))
 female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_female.csv")))
 
@@ -26,9 +26,10 @@ female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stat
 male_pvalues$sex <- "M"
 female_pvalues$sex <- "F"
 
-# concatenate male ane female pvalue dataframes and remove column that are not needed
+# concatenate male and female pvalue dataframes and remove column that are not needed
 allpvalues <- bind_rows(male_pvalues, female_pvalues)
 allpvalues <- allpvalues %>% select(-Z_mean, -P_value)
+
 # Replace '.' character with space for tract names
 allpvalues <- allpvalues %>%
   mutate(Tract = gsub("\\.", " ", Tract))
