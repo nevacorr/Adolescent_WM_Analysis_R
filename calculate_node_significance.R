@@ -7,8 +7,6 @@ calculate_node_significance <- function(tract_data, tract, metric, sex){
   
   tract_summary <- summary(tract_model)
   
-  print(tract_summary)
-  
   # Get parametric terms (node effects)
   param_table <- as.data.frame(tract_summary$p.table)
   
