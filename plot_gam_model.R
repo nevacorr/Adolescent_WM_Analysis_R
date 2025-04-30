@@ -1,6 +1,6 @@
 library(ggplot2)
 
-plot_nodewise_estimates <- function(model, tract, metric, sex, title = "Node-wise z Estimates") {
+plot_nodewise_estimates <- function(model, tract, metric, sex, title = "Node-wise z Estimates not corrected") {
   # Extract parametric table
   model_summary <- summary(model)
   param_table <- as.data.frame(model_summary$p.table)
