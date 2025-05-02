@@ -128,7 +128,7 @@ run_tractable_single_tract_and_itsadug <- function(df_z, unique_tracts, metric) 
     
     # correct within each tract for node-level p-values
     node_pvalues <- node_pvalues %>%
-      group_by(Tract) %>%
+      group_by(Node) %>%
       mutate(adjusted_p_value = p.adjust(P_value, method = "fdr")) %>%
       ungroup()
   
