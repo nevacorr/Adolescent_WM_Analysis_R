@@ -5,9 +5,11 @@
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
 calc_spline_diff <- function(gam_model, 
+                             tract_data, 
                              tract, 
-                             comp_list) {
-  # Investigate whether differences exist between spline fit FAs
+                             comp_list,
+                             gam_plot_dir) {
+  # Investigate whether differences exist between spline fit 
   #
   # This function does a number of things:
   #   1) Makes plots and tables
@@ -25,23 +27,17 @@ calc_spline_diff <- function(gam_model,
   #   diff_list, node_max = indexed list of nodes which differed
   #     [[1]] = nodes which differed, [[2]] = node of maximum difference
   
-  browser()
-  
   # make plots and tables
-  plot_spline_diff(gam_model, tract, comp_list[1], comp_list[2])
-  
-  browser()
+  plot_spline_diff(gam_model, tract_data, tract, comp_list[1], comp_list[2], 
+                   gam_plot_dir)
   
   # get plot_diff data frames
-  df_est_diff <- make_spline_diff_df(gam_model, comp_list[1], comp_list[2])
-  
-  browser()
+  df_est_diff <- make_spline_diff_df(gam_model, tract_data, tract, 
+                                     comp_list[1], comp_list[2])
   
   # determine where nodes differ
   node_list <- unique(df_est_diff$nodeID)
   diff_list <- vector()
-  
-  browser()
   
   for (node in node_list) {
     ind_node <- which(df_est_diff$nodeID == node)
@@ -52,14 +48,10 @@ calc_spline_diff <- function(gam_model,
     }
   }
   
-  browser()
-  
   # find node of max difference
   h_df <- subset(df_est_diff, nodeID %in% diff_list)
   ind_max <- which(abs(h_df$est) == max(abs(h_df$est)))
   node_max <- h_df[ind_max, ]$nodeID
-  
-  browser()
   
   return(list(diff_list, node_max))
 }
