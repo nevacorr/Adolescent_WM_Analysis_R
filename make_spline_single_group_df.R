@@ -3,40 +3,35 @@
 # statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
-make_spline_diff_df <- function(gam_model, 
+make_spline_single_group_df <- function(gam_model, 
                                 tract_data, 
                                 tract, 
-                                factor_a, 
-                                factor_b) {
-  # Make a dataframe of fit differences when testing 2 splines
-  #
-  # Get difference values from testing whether spline A
-  # differs from spline B at each node.
+                                sex_val) {
+  # Make a dataframe of fit for one group, with CI
   #
   # Arguments:
   #   gam_model = GAM object, produced by gam/bam
-  #   factor_a = group factor (0-2)
-  #   factor_b = group factor (0-2)
+  #   tract_data = dataframe with tract data
+  #   tract name (string)
+  #   group_level = one level of the grouping factor (e.g., "M" or "F")
   #
   # Returns:
-  #   df_pair = dataframe of differences
+  #   final_df = dataframe with est, nodeID, CI, etc.
+  
+  browser()
   
   # determine predicted differences
-  df_pair <- plot_diff(gam_model,
+  df_sex_val <- plot_smooth(gam_model,
                        view = "nodeID",
-                       comp = list(sex = c(factor_a, factor_b)),
-                       rm.ranef = T,
-                       plot = F,
-                       values = list(nodeID = sort(unique(tract_data$nodeID)))
+                       cond = list(sex = sex_val),
+                       rm.ranef = F
   )
   
   browser()
   
-  # add Comparison column to df
-  colnames(df_pair) <- c(colnames(df_pair[, 1:4]), "Comp")
-  df_pair$Comp <- paste0(factor_a, factor_b)
+  final_df <- fdr_adjust_CIs(df_sex_val$fv)
   
   browser()
   
-  return(df_pair)
+  return(final_df)
 }
