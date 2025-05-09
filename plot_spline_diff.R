@@ -4,9 +4,11 @@
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
 plot_spline_diff <- function(gam_model, 
-                             tract, 
+                             tract_data, 
+                             tract,
                              factor_a, 
-                             factor_b) {
+                             factor_b,
+                             gam_plot_dir) {
   # Draw a spline-difference plot for 2 splines
   #
   # This will make plots and write tables of sig
@@ -23,27 +25,36 @@ plot_spline_diff <- function(gam_model,
   #   table_dir/Table_Diff_*.txt
   
   # setup for plotting
-  group_a <- switch_plot_values(factor_a)[[2]][1]
-  group_b <- switch_plot_values(factor_b)[[2]][1]
+  # group_a <- switch_plot_values(factor_a)[[2]][1]
+  # group_b <- switch_plot_values(factor_b)[[2]][1]
   
   # determine sig nodes
+  
+  browser()
+  
+  # This next line uses itsadug function plot_diff
   p_summary <- capture.output(plot_diff(gam_model,
                                         view = "nodeID",
-                                        comp = list(group = c(factor_a, factor_b)),
-                                        rm.ranef = T
+                                        comp = list(sex = c(factor_a, factor_b)),
+                                        rm.ranef = T, 
+                                        values = list(nodeID = sort(unique(tract_data$nodeID)))
   ))
-  sig_regions <- p_summary[10:length(p_summary)]
+  sig_regions <- p_summary[8:length(p_summary)]
   sig_regions <- gsub("\\t", "", sig_regions)
+  
+  browser()
   
   # make list of start and end nodes, for shading
   sig_list <- as.list(strsplit(sig_regions, " - "))
   start_list <- as.numeric(sapply(sig_list, "[[", 1))
   end_list <- as.numeric(sapply(sig_list, "[[", 2))
   
+  browser()
+  
   # determine bottom of plot
   p_est <- plot_diff(gam_model,
                      view = "nodeID",
-                     comp = list(group = c(factor_a, factor_b)),
+                     comp = list(sex = c(factor_a, factor_b)),
                      rm.ranef = T,
                      plot = F
   )
@@ -51,31 +62,37 @@ plot_spline_diff <- function(gam_model,
   h_ci <- p_est[which(p_est$est == h_min), ]$CI
   min_val <- h_min - h_ci
   
+  browser()
+  
   # set output
   png(
     filename = paste0(
-      gam_plot_dir, "Plot_Diff_", tract, "_G3_pair.png"
+      gam_plot_dir, "Plot_Diff_", tract, "_pair.png"
     ),
     width = 600, height = 600
   )
+  
+  browser()
   
   # draw plot
   par(mar = c(5, 5, 4, 2), family = "Times New Roman")
   plot_diff(gam_model,
             view = "nodeID",
-            comp = list(group = c(factor_a, factor_b)),
+            comp = list(sex = c(factor_a, factor_b)),
             rm.ranef = T,
             main = paste0(
-              "Difference Scores, ", group_a, "-", group_b
+              "Difference Scores, ", factor_a, "-", factor_b
             ),
-            ylab = "Est. FA difference",
-            xlab = "Tract Node",
+            ylab = "Est. z score difference",
+            xlab = "Node",
             cex.lab = 2,
             cex.axis = 2,
             cex.main = 2,
             cex.sub = 1.5,
             col.diff = "red"
   )
+  
+  browser()
   
   # shade significant regions
   for (h_ind in 1:length(start_list)) {
@@ -86,6 +103,8 @@ plot_spline_diff <- function(gam_model,
       border = NA
     )
   }
+  
+  browser()
   
   par(mar = c(5, 4, 4, 2))
   dev.off()
