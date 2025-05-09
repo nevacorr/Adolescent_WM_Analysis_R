@@ -16,7 +16,7 @@ run_single_tract <- function(df_z, unique_tracts, metric) {
     
     # Filter for current tract
     tract_data <- df_z[df_z$tractID == tract, ]
-
+    
     gam_file <- paste0(out_dir, "gam_", tract, ".Rda")
     if (!file.exists(gam_file)) {
       gam_model <- calc_gam_stats(tract_data, tract, gam_stats_dir)
@@ -28,6 +28,12 @@ run_single_tract <- function(df_z, unique_tracts, metric) {
     
     # Plot the model for this tract
     plot_gam_splines(gam_model, tract_data, tract, gam_plot_dir)
+    
+    # determine nodes of group differences
+    comp_list <- c("M", "F")
+    node_list <- calc_spline_diff(gam_model, tract_data, tract, comp_list, gam_plot_dir)
+    all_node_list <- node_list[[1]]
+    max_node_list <- node_list[[2]]
     
   }
   
