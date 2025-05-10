@@ -36,29 +36,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metri
         tract = tract,
         target = 'z'
       )
- 
-      # Loop through each node in the current tract
-      for (node in unique(df_z$nodeID)) {
-        
-        # Extract the observed data for the current node
-        observed_values <- df_z[df_z$nodeID == node & df_z$tractID == tract, "z", drop = TRUE]
-        
-        # Compute the mean z-score for the current node 
-        mean_z <- mean(observed_values) 
-        
-        # Perform a t-test to see if the z-score is significantly different from zero
-        t_test_result <- t.test(observed_values, mu = 0)
-        
-        p <- t_test_result$p.value
-        
-        # Store the p-value and mean z-score for the current node and tract
-        node_pvalues <- rbind(node_pvalues, data.frame(
-          Node = node, 
-          P_value = t_test_result$p.value, 
-          Z_mean = mean_z,
-          Tract = tract
-        ))
-      }
     }
     
     model_summary = summary(model)
@@ -82,12 +59,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metri
     
   }
   
-  if (sexflag == 0) {
-    
-    # Apply FDR correction to the p-values
-    node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
-    
-  }
   
   return(list(results_df = results_df, node_pvalues = node_pvalues))
 }
