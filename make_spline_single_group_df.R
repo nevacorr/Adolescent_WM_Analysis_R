@@ -17,21 +17,26 @@ make_spline_single_group_df <- function(gam_model,
   #
   # Returns:
   #   final_df = dataframe with est, nodeID, CI, etc.
+
+  num_comparisons <- 60
   
-  browser()
+  adj_alpha <- 0.05 / num_comparisons
   
+  z_adj <- qnorm(1 - adj_alpha / 2)
+
   # determine predicted differences
   df_sex_val <- plot_smooth(gam_model,
                        view = "nodeID",
+                       se = z_adj,
                        cond = list(sex = sex_val),
                        rm.ranef = F
   )
   
-  browser()
+  # Check if the adjusted confidence intervals contain zero
+  significant <- ifelse(df_sex_val$fv$ll < 0 & df_sex_val$fv$ul > 0, 0, 1)
   
-  final_df <- fdr_adjust_CIs(df_sex_val$fv)
+  # Add significance to a dataframe
+  df_sex_val$fv$significant <-  significant
   
-  browser()
-  
-  return(final_df)
+  return(df_sex_val$fv)
 }
