@@ -1,6 +1,10 @@
 library(tractable)
 
-run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metric) {
+run_tractable_single_tract_model <- function(df_z, 
+                                             unique_tracts, 
+                                             sexflag, 
+                                             metric, 
+                                             output_image_path) {
   
   results_df <- data.frame(
     metric = character(),
@@ -13,10 +17,7 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metri
     results_df$sex_p <- numeric()
   }
   
-  # Initialize an empty dataframe to store p-values for each node and tract
-  node_pvalues <- data.frame(Node = integer(), P_value = numeric(), 
-                             T_statistic = numeric(), Z_mean = numeric(),
-                             Tract = character(), stringsAsFactors = FALSE)
+  df_all_nodes = NULL
   
   for (tract in unique_tracts) {
     # Fit the model
@@ -33,9 +34,17 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metri
       # If looking at each sex separately (df_z only has data for one sex)
       model <-  tractable_single_tract(
         df = df_z,
+        node_k = 60,
         tract = tract,
         target = 'z'
       )
+ 
+      # Filter for current tract
+      tract_data <- df_z[df_z$tractID == tract, ]
+      
+      # Calculate confidence intervals and significance of every node
+      df_all_nodes <- make_spline_single_group_df(model, tract_data, tract, output_image_path)
+
     }
     
     model_summary = summary(model)
@@ -59,7 +68,6 @@ run_tractable_single_tract_model <- function(df_z, unique_tracts, sexflag, metri
     
   }
   
-  
-  return(list(results_df = results_df, node_pvalues = node_pvalues))
+  return(list(results_df = results_df, df_all_nodes=df_all_nodes))
 }
 
