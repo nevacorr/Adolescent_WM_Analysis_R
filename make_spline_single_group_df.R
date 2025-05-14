@@ -1,12 +1,6 @@
-# This code is from Supplementary Materials for NM Muncy, A Kimbler, 
-# AM Hedges-Muncy, DL McMakin, AT Mattfeld. General additive models address 
-# statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
-# Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
-
 make_spline_single_group_df <- function(gam_model, 
                                 tract_data, 
-                                tract, 
-                                sex_val) {
+                                tract) {
   # Make a dataframe of fit for one group, with CI
   #
   # Arguments:
@@ -16,27 +10,45 @@ make_spline_single_group_df <- function(gam_model,
   #   group_level = one level of the grouping factor (e.g., "M" or "F")
   #
   # Returns:
-  #   final_df = dataframe with est, nodeID, CI, etc.
+  #   df_sex_val$fv = dataframe with est, nodeID, CI, etc.
 
   num_comparisons <- 60
   
   adj_alpha <- 0.05 / num_comparisons
-  
+
   z_adj <- qnorm(1 - adj_alpha / 2)
 
   # determine predicted differences
   df_sex_val <- plot_smooth(gam_model,
                        view = "nodeID",
                        se = z_adj,
-                       cond = list(sex = sex_val),
+                       main = tract,
                        rm.ranef = F
   )
   
   # Check if the adjusted confidence intervals contain zero
-  significant <- ifelse(df_sex_val$fv$ll < 0 & df_sex_val$fv$ul > 0, 0, 1)
+  pvalues <- ifelse(df_sex_val$fv$ll < 0 & df_sex_val$fv$ul > 0, 0.5, 0.01)
   
   # Add significance to a dataframe
-  df_sex_val$fv$significant <-  significant
+  df_sex_val$fv$pvalues <-  pvalues
+  
+  browser()
   
   return(df_sex_val$fv)
+  
+ci_to_pvalue <- function(estimate, lower, upper, conf_level = 0.95) {
+  # Get z critical value (e.g., 1.96 for 95% CI)
+  z_critical <- qnorm(1 - (1 - conf_level) / 2)
+  
+  # Calculate SE from CI width
+  se <- (upper - lower) / (2 * z_critical)
+  
+  # Calculate z-statistic
+  z_stat <- estimate / se
+  
+  # Calculate two-sided p-value
+  p_value <- 2 * (1 - pnorm(abs(z_stat)))
+  
+  return(p_value)
+}
 }
