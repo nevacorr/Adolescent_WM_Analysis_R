@@ -23,7 +23,7 @@ make_spline_single_group_df <- function(gam_model,
                        view = "nodeID",
                        se = z_adj,
                        main = tract,
-                       rm.ranef = F
+                       rm.ranef = T
   )
   
   # Check if the adjusted confidence intervals contain zero
@@ -36,19 +36,19 @@ make_spline_single_group_df <- function(gam_model,
   
   return(df_sex_val$fv)
   
-ci_to_pvalue <- function(estimate, lower, upper, conf_level = 0.95) {
-  # Get z critical value (e.g., 1.96 for 95% CI)
-  z_critical <- qnorm(1 - (1 - conf_level) / 2)
-  
-  # Calculate SE from CI width
-  se <- (upper - lower) / (2 * z_critical)
-  
-  # Calculate z-statistic
-  z_stat <- estimate / se
-  
-  # Calculate two-sided p-value
-  p_value <- 2 * (1 - pnorm(abs(z_stat)))
-  
-  return(p_value)
-}
+# ci_to_pvalue <- function(estimate, lower, upper, conf_level = 0.95) {
+#   # Get z critical value (e.g., 1.96 for 95% CI)
+#   z_critical <- qnorm(1 - (1 - conf_level) / 2)
+#   
+#   # Calculate SE from CI width
+#   se <- (upper - lower) / (2 * z_critical)
+#   
+#   # Calculate z-statistic
+#   z_stat <- estimate / se
+#   
+#   # Calculate two-sided p-value
+#   p_value <- 2 * (1 - pnorm(abs(z_stat)))
+#   
+#   return(p_value)
+# }
 }
