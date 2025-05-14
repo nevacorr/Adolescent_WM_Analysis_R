@@ -10,10 +10,11 @@ source("load_multinode_tract_data.R")
 source("make_plots_with_tractable.R")
 source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
-source("plot_from_tractable_sourcecode_edited.R")
+source("plot_from_trawictable_sourcecode_edited.R")
+source("make_spline_single_group_df.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
+metric <-  "md"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -91,14 +92,7 @@ cat(significant_tracts_male, sep = "\n")
 print(paste("Tracts with significantly different",metric,"values post-covid for females:"))
 cat(significant_tracts_female, sep = "\n")
 
-tractnames = c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
-plot_specific_tracts(df_z,tractnames, 1, "_sig_m_and_f", 6.667, 3.333, metric)
-tractnames = c("Callosum.Forceps.Major","Callosum.Forceps.Minor","Left.Arcuate",
-                "Right.Arcuate", 
-                "Left.IFOF", "Right.IFOF","Right.ILF", "Right.Corticospinal")
-plot_specific_tracts(df_z,tractnames, 1, "_sig_f_only", 10, 10, metric)
-
 node_vals_male = output_male$node_pvalues
 node_vals_female = output_female$node_pvalues
-write.csv(node_vals_female, paste0(metric, "_node_stats_female.csv"), row.names = FALSE)
-write.csv(node_vals_male, paste0(metric, "_node_stats_male.csv"), row.names = FALSE)
+write.csv(node_vals_female, paste0(metric, "_node_sig_stats_female.csv"), row.names = FALSE)
+write.csv(node_vals_male, paste0(metric, "_node_sig_stats_male.csv"), row.names = FALSE)
