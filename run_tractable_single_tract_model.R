@@ -4,8 +4,10 @@ run_tractable_single_tract_model <- function(df_z,
                                              unique_tracts, 
                                              sexflag, 
                                              metric, 
-                                             output_image_path) {
+                                             output_image_path,
+                                             sex_str) {
   
+  # Make an empty dataframe to store tract-level statistics
   results_df <- data.frame(
     metric = character(),
     tract = character(),
@@ -13,13 +15,25 @@ run_tractable_single_tract_model <- function(df_z,
     stringsAsFactors = FALSE
   )
   
+  # Make an empty dataframe to store t-test p-values for each node for each tract
+  node_ttest_pvalues <- data.frame(
+    Node = integer(), 
+    P_value = numeric(), 
+    T_statistic = numeric(), 
+    Z_mean = numeric(),
+    Tract = character(), 
+    stringsAsFactors = FALSE)
+  
   if (sexflag == 1) {
     results_df$sex_p <- numeric()
   }
   
-  df_all_nodes = NULL
+  ci_all_nodes = NULL
   
   for (tract in unique_tracts) {
+    
+    print(paste('modeling tract', tract))
+    
     # Fit the model
     # If comparing across sexes
     if (sexflag == 1) {
@@ -34,16 +48,23 @@ run_tractable_single_tract_model <- function(df_z,
       # If looking at each sex separately (df_z only has data for one sex)
       model <-  tractable_single_tract(
         df = df_z,
-        node_k = 60,
         tract = tract,
         target = 'z'
       )
- 
+      
+      # check k
+      # gam.check(model, rep = 500)
+      
+      node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
+      
+      node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
+      
       # Filter for current tract
       tract_data <- df_z[df_z$tractID == tract, ]
       
       # Calculate confidence intervals and significance of every node
-      df_all_nodes <- make_spline_single_group_df(model, tract_data, tract, output_image_path)
+      # using itsadug 
+      ci_all_nodes <- make_spline_single_group_df(model, tract_data, tract, output_image_path, sex_str)
 
     }
     
@@ -51,23 +72,31 @@ run_tractable_single_tract_model <- function(df_z,
   
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
     
-    # Construct result row
+    # Construct result row for tract level statistics
     new_row <- list(
       metric = metric, 
       tract = tract,
       intercept_p = sprintf("%.3f", intercept_p_value)
     )
-
+    
+    # If comparing sexes, add row for statistics for sex difference
     if (sexflag == 1) {
       sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
       new_row$sex_p <- sprintf("%.3f",sex_p_value)
     }
     
-    # Append new row to dataframe
+    # Append new row to tract-level statistics dataframe
     results_df <- rbind(results_df, new_row)
     
   }
   
-  return(list(results_df = results_df, df_all_nodes=df_all_nodes))
+  if (sexflag == 0) {
+    
+    # Apply FDR correction to the node-level p-values
+    node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
+    
+  }
+  
+  return(list(results_df=results_df, ci_all_nodes=ci_all_nodes, node_ttest_pvalues=node_ttest_pvalues))
 }
 

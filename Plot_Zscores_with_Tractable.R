@@ -10,8 +10,9 @@ source("load_multinode_tract_data.R")
 source("make_plots_with_tractable.R")
 source("run_tractable_single_tract_model.R")
 source("apply_fdr_correction.R")
-source("plot_from_trawictable_sourcecode_edited.R")
+source("plot_from_tractable_sourcecode_edited.R")
 source("make_spline_single_group_df.R")
+source("compute_t_scores_for_nodes_by_tract.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric <-  "md"
@@ -54,17 +55,17 @@ df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
 # # Run tractable_single_tract() for each tract and collect stats
-output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric)
+output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric, output_image_path, NULL)
 results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
 print(results_df)
-output_male <-  run_tractable_single_tract_model(df_z_male, unique_tracts, 0, metric)
+output_male <-  run_tractable_single_tract_model(df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
 results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
 print(metric)
 print("with only male data")
 print(results_df_male)
-output_female <-  run_tractable_single_tract_model(df_z_female, unique_tracts, 0, metric)
+output_female <-  run_tractable_single_tract_model(df_z_female, unique_tracts, 0, metric, output_image_path, 'female')
 results_df_female <- apply_fdr_correction(output_female$results_df, "intercept_p")
 print(metric)
 print("with only female data")
@@ -92,7 +93,9 @@ cat(significant_tracts_male, sep = "\n")
 print(paste("Tracts with significantly different",metric,"values post-covid for females:"))
 cat(significant_tracts_female, sep = "\n")
 
-node_vals_male = output_male$node_pvalues
-node_vals_female = output_female$node_pvalues
+ci_all_nodes_male = output_male$ci_all_nodes
+
+node_vals_male = output_male$node_ttest_pvalues
+node_vals_female = output_female$node_ttest_pvalues
 write.csv(node_vals_female, paste0(metric, "_node_sig_stats_female.csv"), row.names = FALSE)
 write.csv(node_vals_male, paste0(metric, "_node_sig_stats_male.csv"), row.names = FALSE)

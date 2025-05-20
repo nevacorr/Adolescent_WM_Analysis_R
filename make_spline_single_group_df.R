@@ -1,17 +1,8 @@
 make_spline_single_group_df <- function(gam_model, 
                                 tract_data, 
                                 tract,
-                                output_image_path) {
-  # Make a dataframe of fit for one group, with CI
-  #
-  # Arguments:
-  #   gam_model = GAM object, produced by gam/bam
-  #   tract_data = dataframe with tract data
-  #   tract name (string)
-  #   group_level = one level of the grouping factor (e.g., "M" or "F")
-  #
-  # Returns:
-  #   df_sex_val$fv = dataframe with est, nodeID, CI, etc.
+                                output_image_path,
+                                sex_str) {
 
   num_comparisons <- 60
   
@@ -19,8 +10,9 @@ make_spline_single_group_df <- function(gam_model,
 
   z_adj <- qnorm(1 - adj_alpha / 2)
 
-  # Make a plot
-  full_path <- file.path(output_image_path, paste0(tract, "model_plot.png"))
+  # Make a plot output file
+  full_path <- file.path(output_image_path, 
+                         paste0(tract, "model_plot", sex_str, ".png"))
   png(full_path, width=800, height=600, res=150)
   
   # determine predicted differences
@@ -42,19 +34,4 @@ make_spline_single_group_df <- function(gam_model,
   
   return(df_sex_val$fv)
   
-# ci_to_pvalue <- function(estimate, lower, upper, conf_level = 0.95) {
-#   # Get z critical value (e.g., 1.96 for 95% CI)
-#   z_critical <- qnorm(1 - (1 - conf_level) / 2)
-#   
-#   # Calculate SE from CI width
-#   se <- (upper - lower) / (2 * z_critical)
-#   
-#   # Calculate z-statistic
-#   z_stat <- estimate / se
-#   
-#   # Calculate two-sided p-value
-#   p_value <- 2 * (1 - pnorm(abs(z_stat)))
-#   
-#   return(p_value)
-# }
 }
