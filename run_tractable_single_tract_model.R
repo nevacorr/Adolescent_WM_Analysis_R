@@ -1,5 +1,3 @@
-library(tractable)
-
 run_tractable_single_tract_model <- function(df_z, 
                                              unique_tracts, 
                                              sexflag, 
@@ -15,6 +13,10 @@ run_tractable_single_tract_model <- function(df_z,
     stringsAsFactors = FALSE
   )
   
+  if (sexflag == 1) {
+    results_df$sex_p <- numeric()
+  }
+  
   # Make an empty dataframe to store t-test p-values for each node for each tract
   node_ttest_pvalues <- data.frame(
     Node = integer(), 
@@ -24,11 +26,8 @@ run_tractable_single_tract_model <- function(df_z,
     Tract = character(), 
     stringsAsFactors = FALSE)
   
-  if (sexflag == 1) {
-    results_df$sex_p <- numeric()
-  }
-  
-  ci_all_nodes = NULL
+  # Create dataframe to store confidence intervals for all nodes from all tracts
+  ci_all_nodes_all_tracts <- data.frame()
   
   for (tract in unique_tracts) {
     
@@ -56,7 +55,6 @@ run_tractable_single_tract_model <- function(df_z,
       # gam.check(model, rep = 500)
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
-      
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
       
       # Filter for current tract
@@ -64,8 +62,10 @@ run_tractable_single_tract_model <- function(df_z,
       
       # Calculate confidence intervals and significance of every node
       # using itsadug 
-      ci_all_nodes <- make_spline_single_group_df(model, tract_data, tract, output_image_path, sex_str)
-
+      ci_single <- make_spline_single_group_df(model, tract_data, tract, output_image_path, sex_str)
+      ci_single$tract <- tract
+      
+      ci_all_nodes_all_tracts <- rbind(ci_all_nodes_all_tracts, ci_single)
     }
     
     model_summary = summary(model)
@@ -97,6 +97,9 @@ run_tractable_single_tract_model <- function(df_z,
     
   }
   
-  return(list(results_df=results_df, ci_all_nodes=ci_all_nodes, node_ttest_pvalues=node_ttest_pvalues))
+  return(list(
+    results_df=results_df, 
+    ci_all_nodes_all_tracts=ci_all_nodes_all_tracts, 
+    node_ttest_pvalues=node_ttest_pvalues))
 }
 

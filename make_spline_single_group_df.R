@@ -23,6 +23,8 @@ make_spline_single_group_df <- function(gam_model,
                        rm.ranef = T
   )
   
+  df_sex_val$fv$subjectID <- "population_mean"
+  
   # Close device
   dev.off()
   

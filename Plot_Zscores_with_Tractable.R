@@ -94,8 +94,11 @@ print(paste("Tracts with significantly different",metric,"values post-covid for 
 cat(significant_tracts_female, sep = "\n")
 
 ci_all_nodes_male = output_male$ci_all_nodes
+ci_all_nodes_female = output_female$ci_all_nodes
+write.csv(ci_all_nodes_female, paste0(metric, "_node_sig_stats_from_ci_female.csv"), row.names = FALSE)
+write.csv(ci_all_nodes_male, paste0(metric, "_node_sig_stats_from_ci_male.csv"), row.names = FALSE)
 
 node_vals_male = output_male$node_ttest_pvalues
 node_vals_female = output_female$node_ttest_pvalues
-write.csv(node_vals_female, paste0(metric, "_node_sig_stats_female.csv"), row.names = FALSE)
-write.csv(node_vals_male, paste0(metric, "_node_sig_stats_male.csv"), row.names = FALSE)
+write.csv(node_vals_female, paste0(metric, "_node_sig_stats_from_ttest_female.csv"), row.names = FALSE)
+write.csv(node_vals_male, paste0(metric, "_node_sig_stats_from_ttest_male.csv"), row.names = FALSE)
