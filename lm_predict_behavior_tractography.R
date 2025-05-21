@@ -16,10 +16,6 @@ metric <-  "md"
 behavior <- "FlankerSU"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
-selected_tracts <- c("Left.Uncinate", "Right.Uncinate", "Right.Thalamic.Radiation",
-                     "Left.Thalamic.Radiation", "Left.IFOF", "Right.IFOF",
-                     "Left.ILF", "Right.ILF", "Left.SLF", "Right.SLF",
-                     "Left.Arcuate","Right.Arcuate", "Callosum.Forceps.Minor")
 
 # read data file
 z_orig <- read.csv(file.path(data_dir, data_filename))
@@ -89,7 +85,9 @@ results_df <- results_df %>%
   filter(term == "mean_dwi") %>%
   arrange(p.adjust)
 
+extra_title = 'p_uncorr=0.078'
+
 p <- plot_behav_vs_measure(df_z_all_data, 'Callosum.Forceps.Minor',  'mean_dwi', behavior,
-                      toupper(metric))
+                      toupper(metric), extra_title)
 print(p)
 print('computations complete')
