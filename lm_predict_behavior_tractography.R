@@ -2,15 +2,18 @@ library(lme4)
 library(dplyr)
 library(tidyr)
 library(broom.mixed)
+library(ggplot2)
 
 # Remove all variables in the environment
 rm(list = ls())
 
 source("load_multinode_tract_data.R")
 source("average_across_splits.R")
+source("plot_behav_vs_measure.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric <-  "md"
+behavior <- "FlankerSU"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 selected_tracts <- c("Left.Uncinate", "Right.Uncinate", "Right.Thalamic.Radiation",
@@ -32,8 +35,8 @@ df_z_brain = reformat_data(z_orig)
 
 behav_df <- read.csv('Z_scores_all_meltzoff_cogn_behav_visit2.csv')
 
-# Keep only 'participant_id' and 'FlankerSU' columns
-behav_df <- behav_df[, c("participant_id", "FlankerSU")]
+# Keep only 'participant_id' and behavior columns
+behav_df <- behav_df[, c("participant_id", behavior)]
 
 #  Rename column z to z_brain in df_z_brain
 df_z_brain <- df_z_brain %>%
@@ -41,17 +44,17 @@ df_z_brain <- df_z_brain %>%
 
 df_brainz_by_tract <- df_z_brain %>%
   group_by(subjectID, tractID, age, sex) %>%
-  summarize(mean_MD = mean(z_brain, na.rm = TRUE), .groups = "drop")
+  summarize(mean_dwi = mean(z_brain, na.rm = TRUE), .groups = "drop")
 
-df_brainz_by_tract <- df_brainz_by_tract %>% 
-  filter(tractID %in% selected_tracts)
+# df_brainz_by_tract <- df_brainz_by_tract %>% 
+#   filter(tractID %in% selected_tracts)
 
 # Merge behav_df into df_z_brain by matching subjectID to participant_id
-# This will add the FlankerSU column to df_z_brain
+# This will add the behavior column to df_z_brain
 df_z_all_data <- df_brainz_by_tract %>%
   left_join(behav_df, by = c("subjectID" = "participant_id"))
 
-#  Remove rows where z score or FlankerSU is NA
+#  Remove rows where z score or behavior is NA
 df_z_all_data <- df_z_all_data %>% drop_na()
 
 # Convert variables to factors
@@ -67,7 +70,11 @@ tracts <- unique(df_z_all_data$tractID)
 results <- lapply(tracts, function(tract) {
   data_subset <- df_z_all_data %>% filter(tractID == tract)
   
-  model <- lm(FlankerSU ~ mean_MD + sex, data = data_subset)
+  # Construct formula string
+  formula_str <- paste(behavior, "~ mean_dwi + sex + age")
+  
+  # Convert to formula
+  model <- lm(as.formula(formula_str), data = data_subset)
   
   broom::tidy(model) %>% mutate(tractID = tract)
 })
@@ -79,5 +86,10 @@ results_df <- bind_rows(results)
 results_df <- results_df %>%
   group_by(term) %>%
   mutate(p.adjust = p.adjust(p.value, method = "fdr")) %>%
-  filter(term == "mean_MD") %>%
+  filter(term == "mean_dwi") %>%
   arrange(p.adjust)
+
+p <- plot_behav_vs_measure(df_z_all_data, 'Callosum.Forceps.Minor',  'mean_dwi', behavior,
+                      toupper(metric))
+print(p)
+print('computations complete')
