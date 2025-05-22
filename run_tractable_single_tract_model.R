@@ -48,11 +48,14 @@ run_tractable_single_tract_model <- function(df_z,
       model <-  tractable_single_tract(
         df = df_z,
         tract = tract,
-        target = 'z'
+        target = 'z', 
+        weights = robust.weights
       )
       
       # check k
-      # gam.check(model, rep = 500)
+      gam.check(model, rep = 500)
+      
+      browser()
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
