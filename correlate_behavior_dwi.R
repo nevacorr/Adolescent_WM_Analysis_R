@@ -2,6 +2,9 @@
 library(mgcv)
 library(dplyr)
 library(tidyr)
+library(itsadug)
+library(gratia)
+library(ggplot2)
 
 # Remove all variables in the environment
 rm(list = ls())
@@ -60,8 +63,8 @@ pvals <- numeric(length(tract_list))
 tract_names <- character(length(tract_list))
 
 # Loop over each tract
-for (i in 1)
-# for (i in seq_along(tract_list)) 
+# for (i in 1)
+for (i in seq_along(tract_list))
   {
   print(paste('modeling tract', tract_list[i]))
   
@@ -70,19 +73,25 @@ for (i in 1)
   # Filter the data for this tract
   df_sub <- df_z_all_data %>% filter(tractID == tract)
   
-  # Fit the GAM model
-  model <- gam(FlankerSU ~ sex + s(z_brain, k = 10) + s(subjectID, bs = "re"),
-               data = df_sub, method = "REML")
+  df_sub$ar_start <- df_sub[['nodeID']] == 0
   
-  model <- gam(z_brain ~ FlankerSU + s(nodeiD, k=10) + s(subjectID, bs = "re")
-               data = df_sub, method = "REML")
+  # Fit the GAM model without autocorrelation
   
-  # k needs to be large enough
-  # take into account autocorrelation in the error (tractable code))
-  # will get a pvalue associated with the flanker
+  model_no_rho <- gam(z_brain ~ FlankerSU + s(nodeID, k=10) + s(subjectID, bs = "re"),
+               data = df_sub, method = "REML", rho = 0, AR.start = ar_start)
   
-  # Extract p-value for smooth term
-  pvals[i] <- summary(model)$s.table["s(z_brain)", "p-value"]
+  # determine autocorrelation parameter, rho
+  rho <- itsadug::start_value_rho(model_no_rho)
+  
+  # Fit the GAM model with autocorrelation
+  
+  model_with_rho <- gam(z_brain ~ FlankerSU + s(nodeID, k=10) + s(subjectID, bs = "re"),
+                        data = df_sub, method = "REML", rho = rho, AR.start = ar_start)
+  
+  print(summary(model_with_rho))
+  
+  # Extract p-value for FlankerSU
+  pvals[i] <- summary(model_with_rho)$p.table["FlankerSU", "Pr(>|t|)"]
   tract_names[i] <- tract
 }
 
