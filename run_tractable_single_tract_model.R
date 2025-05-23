@@ -41,7 +41,8 @@ run_tractable_single_tract_model <- function(df_z,
         tract = tract,
         target = 'z',
         regressors = c("sex"),
-        node_group = "sex"
+        node_group = "sex", 
+        family = scat()
       )
     } else {
       # If looking at each sex separately (df_z only has data for one sex)
@@ -49,13 +50,11 @@ run_tractable_single_tract_model <- function(df_z,
         df = df_z,
         tract = tract,
         target = 'z', 
-        weights = robust.weights
+        family = scat()
       )
       
       # check k
-      gam.check(model, rep = 500)
-      
-      browser()
+      # gam.check(model, rep = 500)
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
