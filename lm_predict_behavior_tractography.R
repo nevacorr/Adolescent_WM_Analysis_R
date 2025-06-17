@@ -67,7 +67,7 @@ results <- lapply(tracts, function(tract) {
   data_subset <- df_z_all_data %>% filter(tractID == tract)
   
   # Construct formula string
-  formula_str <- paste(behavior, "~ mean_dwi + sex + age")
+  formula_str <- paste(behavior, "~ mean_dwi")
   
   # Convert to formula
   model <- lm(as.formula(formula_str), data = data_subset)
@@ -85,7 +85,7 @@ results_df <- results_df %>%
   filter(term == "mean_dwi") %>%
   arrange(p.adjust)
 
-extra_title = 'p_uncorr=0.078'
+extra_title = 'p_uncorr=0.013'
 
 p <- plot_behav_vs_measure(df_z_all_data, 'Callosum.Forceps.Minor',  'mean_dwi', behavior,
                       toupper(metric), extra_title)
