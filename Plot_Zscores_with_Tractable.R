@@ -1,6 +1,7 @@
 library(tractable)
 library(tidyverse)
 library(dplyr)
+library(mgcv)
 
 # Remove all variables in the environment
 rm(list = ls())
