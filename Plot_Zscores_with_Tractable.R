@@ -2,6 +2,7 @@ library(tractable)
 library(tidyverse)
 library(dplyr)
 library(mgcv)
+library(itsadug)
 
 # Remove all variables in the environment
 rm(list = ls())
@@ -16,7 +17,7 @@ source("make_spline_single_group_df.R")
 source("compute_t_scores_for_nodes_by_tract.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
