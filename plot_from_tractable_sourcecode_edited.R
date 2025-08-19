@@ -225,7 +225,7 @@ plot_tract_profiles_my_edit <- function (
       
       df_curr <- df_curr %>%
         dplyr::mutate(color_col = dplyr::case_when(
-          group == "F" ~ "red",
+          group == "F" ~ rgb(0.1, 0.7, 0.26),
           group == "M" ~ "blue",
         ))
       
@@ -238,7 +238,7 @@ plot_tract_profiles_my_edit <- function (
         rename(pvalue = adjusted_p_value)
       
      df_curr <- df_curr %>%
-       dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, "green", color_col))
+       dplyr::mutate(color_col = dplyr::if_else(pvalue < 0.05, rgb(0.62, 0, 0.62), color_col))
       
       df_f <- df_curr %>%
         filter(group != "M")
