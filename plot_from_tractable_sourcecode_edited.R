@@ -225,8 +225,8 @@ plot_tract_profiles_my_edit <- function (
       
       df_curr <- df_curr %>%
         dplyr::mutate(color_col = dplyr::case_when(
-          group == "F" ~ rgb(0.89, 0, 0.89),
-          group == "M" ~ rgb(0.1, 0.7, 0.26),
+          group == "F" ~ rgb(0.1, 0.7, 0.26),
+          group == "M" ~ rgb(0.89, 0, 0.89),
         ))
       
       # add pvalues to df_curr
