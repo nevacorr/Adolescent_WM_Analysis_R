@@ -17,7 +17,7 @@ source("make_spline_single_group_df.R")
 source("compute_t_scores_for_nodes_by_tract.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
+metric <-  "md"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -26,7 +26,7 @@ output_image_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots
 # define path of node stats output
 output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
-# read data file
+# read z score data file
 z_orig <- read.csv(file.path(data_dir, data_filename))
 
 # remove first column
@@ -36,8 +36,10 @@ if ("split" %in% colnames(z_orig)) {
   z_orig <- average_across_splits(z_orig)
 }
 
+# convert data to long format and add sex and age columns
 df_z = reformat_data(z_orig)
 
+# plot all tracts by sex
 plot_tracts(df_z, 1, output_image_path)
 
 # Convert sex to factor
@@ -46,13 +48,16 @@ df_z <- df_z %>%
     sex = factor(sex)
   )
 
+# convert subjectID to factor
 df_z$subjectID <- factor(df_z$subjectID)
 
 # Get unique tract names
 unique_tracts <- unique(df_z$tractID)
 
+# remove rows without zscores
 df_z <- df_z %>% filter(!is.na(z))
 
+# create separate dataframe for each sex
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
