@@ -13,8 +13,6 @@ run_tractable_single_tract_model <- function(df_z,
     stringsAsFactors = FALSE
   )
   
-  browser()
-  
   if (sexflag == 1) {
     results_df$sex_p <- numeric()
   }
@@ -27,6 +25,10 @@ run_tractable_single_tract_model <- function(df_z,
     Z_mean = numeric(),
     Tract = character(), 
     stringsAsFactors = FALSE)
+  
+  if (sexflag == 1) {
+    node_ttest_pvalues$Z_mean_F <- numeric()
+  }
   
   # Create dataframe to store confidence intervals for all nodes from all tracts
   ci_all_nodes_all_tracts <- data.frame()
@@ -47,7 +49,7 @@ run_tractable_single_tract_model <- function(df_z,
         family = scat()
       )
       
-      node_pvalues <- compute_t_scores_for_nodes_by_tract_sex_diff(df_z, tract)
+      node_pvalues <- compute_t_scores_for_nodes_by_tract_sex_diff(df_z, tract, metric)
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues)
       
       # Filter for current tract
@@ -79,9 +81,6 @@ run_tractable_single_tract_model <- function(df_z,
       ci_all_nodes_all_tracts <- rbind(ci_all_nodes_all_tracts, ci_single)
     }
     
-    
-    browser()
-    
     model_summary = summary(model)
   
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
@@ -103,13 +102,9 @@ run_tractable_single_tract_model <- function(df_z,
     results_df <- rbind(results_df, new_row)
     
   }
-  
-  if (sexflag == 0) {
     
-    # Apply FDR correction to the node-level p-values
-    node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
-    
-  }
+  # Apply FDR correction to the node-level p-values
+  node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
   
   return(list(
     results_df=results_df, 
