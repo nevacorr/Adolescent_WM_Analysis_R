@@ -1,9 +1,8 @@
-compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract) {
+compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
 
   # Initialize an empty dataframe to store t-test p-values for each node 
   node_pvalues <- data.frame(Node = integer(), 
                              P_value = numeric(), 
-                             pooled_var = numeric(),
                              T_statistic = numeric(), 
                              Z_mean_M = numeric(),
                              Z_mean_F = numeric(),
@@ -49,5 +48,46 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract) {
       Tract = tract
     ))
   }
+  
+  # Plot values
+  
+  # Add difference column
+  node_pvalues$Diff <- node_pvalues$Z_mean_M - node_pvalues$Z_mean_F
+  
+  # Flag significance
+  node_pvalues$Significant <- node_pvalues$P_value <= 0.05
+  
+  # Plot mean Z for males and females
+  p1 <- ggplot(node_pvalues, aes(x = Node)) +
+    geom_line(aes(y = Z_mean_M, color = "Male"), linewidth = 1) +
+    geom_line(aes(y = Z_mean_F, color = "Female"), linewidth = 1) +
+    geom_point(data = subset(node_pvalues, Significant),
+               aes(y = (Z_mean_M + Z_mean_F)/2), 
+               color = "red", size = 2) +
+    labs(y = "Mean Z", color = "Group",
+         title = paste0(metric, " Mean Z across nodes by sex — Tract: ", tract)) +
+    theme(
+      panel.background = element_rect(fill = "white"),
+      plot.background  = element_rect(fill = "white"))
+  print(p1)
+  
+  # Plot difference (Male - Female)
+  p2 <- ggplot(node_pvalues, aes(x = Node, y = Diff)) +
+    geom_line(color = "darkblue", size = 1) +
+    geom_point(data = subset(node_pvalues, Significant),
+               aes(y = Diff), color = "red", linewidth = 2) +
+    labs(y = "Difference (Male - Female)",
+         title = paste0(metric, " Difference in mean Z across nodes — Tract: ", tract)) +
+    theme(
+      panel.background = element_rect(fill = "white"),
+      plot.background  = element_rect(fill = "white"))
+  print(p2)
+  
+  # Save the mean Z plot
+  ggsave(filename = paste0(metric, "_", tract, "_meanZ_plot_F_M.png"), plot = p1, width = 8, height = 4, dpi = 300)
+  
+  # Save the difference plot
+  ggsave(filename = paste0(metric, "_", tract, "_diff_plot_M_F.png"), plot = p2, width = 8, height = 4, dpi = 300)
+  
 return(node_pvalues)
 }
