@@ -13,6 +13,8 @@ run_tractable_single_tract_model <- function(df_z,
     stringsAsFactors = FALSE
   )
   
+  browser()
+  
   if (sexflag == 1) {
     results_df$sex_p <- numeric()
   }
@@ -44,6 +46,13 @@ run_tractable_single_tract_model <- function(df_z,
         node_group = "sex", 
         family = scat()
       )
+      
+      node_pvalues <- compute_t_scores_for_nodes_by_tract_sex_diff(df_z, tract)
+      node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues)
+      
+      # Filter for current tract
+      tract_data <- df_z[df_z$tractID == tract, ]      
+      
     } else {
       # If looking at each sex separately (df_z only has data for one sex)
       model <-  tractable_single_tract(
@@ -69,6 +78,9 @@ run_tractable_single_tract_model <- function(df_z,
       
       ci_all_nodes_all_tracts <- rbind(ci_all_nodes_all_tracts, ci_single)
     }
+    
+    
+    browser()
     
     model_summary = summary(model)
   
