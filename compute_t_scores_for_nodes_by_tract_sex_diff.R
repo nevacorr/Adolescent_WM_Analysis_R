@@ -78,14 +78,14 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
     geom_point(data = subset(node_pvalues, Significant),
                aes(y = Diff), color = "red", linewidth = 2) +
     labs(y = "Difference (Male - Female)",
-         title = paste0(metric, " Difference in mean Z across nodes — Tract: ", tract)) +
+         title = paste0("node_zdiff_sexdiff/",metric, " Difference in mean Z across nodes — Tract: ", tract)) +
     theme(
       panel.background = element_rect(fill = "white"),
       plot.background  = element_rect(fill = "white"))
   print(p2)
   
   # Save the mean Z plot
-  ggsave(filename = paste0(metric, "_", tract, "_meanZ_plot_F_M.png"), plot = p1, width = 8, height = 4, dpi = 300)
+  ggsave(filename = paste0("node_zdiff_sexdiff/", metric, "_", tract, "_meanZ_plot_F_M.png"), plot = p1, width = 8, height = 4, dpi = 300)
   
   # Save the difference plot
   ggsave(filename = paste0("node_zdiff_sexdiff/", metric, "_", tract, 
