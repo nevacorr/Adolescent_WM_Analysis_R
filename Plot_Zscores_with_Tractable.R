@@ -3,6 +3,7 @@ library(tidyverse)
 library(dplyr)
 library(mgcv)
 library(itsadug)
+library(ggplot2)
 
 # Remove all variables in the environment
 rm(list = ls())
@@ -15,6 +16,7 @@ source("apply_fdr_correction.R")
 source("plot_from_tractable_sourcecode_edited.R")
 source("make_spline_single_group_df.R")
 source("compute_t_scores_for_nodes_by_tract.R")
+source("compute_t_scores_for_nodes_by_tract_sex_diff.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
 metric <-  "md"
