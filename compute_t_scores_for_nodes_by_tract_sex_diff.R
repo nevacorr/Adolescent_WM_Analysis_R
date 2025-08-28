@@ -65,7 +65,8 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
                aes(y = (Z_mean_M + Z_mean_F)/2), 
                color = "red", size = 2) +
     labs(y = "Mean Z", color = "Group",
-         title = paste0(metric, " Mean Z across nodes by sex — Tract: ", tract)) +
+         title = paste0("node_zdiff_sexdiff/", metric, 
+                        " Mean Z across nodes by sex — Tract: ", tract)) +
     theme(
       panel.background = element_rect(fill = "white"),
       plot.background  = element_rect(fill = "white"))
@@ -87,7 +88,8 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
   ggsave(filename = paste0(metric, "_", tract, "_meanZ_plot_F_M.png"), plot = p1, width = 8, height = 4, dpi = 300)
   
   # Save the difference plot
-  ggsave(filename = paste0(metric, "_", tract, "_diff_plot_M_F.png"), plot = p2, width = 8, height = 4, dpi = 300)
+  ggsave(filename = paste0("node_zdiff_sexdiff/", metric, "_", tract, 
+                           "_diff_plot_M_F.png"), plot = p2, width = 8, height = 4, dpi = 300)
   
 return(node_pvalues)
 }
