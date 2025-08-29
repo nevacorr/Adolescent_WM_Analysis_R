@@ -18,16 +18,24 @@ run_tractable_single_tract_model <- function(df_z,
   }
   
   # Make an empty dataframe to store t-test p-values for each node for each tract
-  node_ttest_pvalues <- data.frame(
+  if (sexflag == 0) {
+    node_ttest_pvalues <- data.frame(
     Node = integer(), 
     P_value = numeric(), 
-    T_statistic = numeric(), 
+    adjusted_p_value = numeric(),
     Z_mean = numeric(),
     Tract = character(), 
     stringsAsFactors = FALSE)
-  
-  if (sexflag == 1) {
-    node_ttest_pvalues$Z_mean_F <- numeric()
+  } 
+  else if (sexflag == 1) {
+    node_ttest_pvalues <- data.frame(
+    Node = integer(), 
+    P_value = numeric(), 
+    adjusted_p_value = numeric(),
+    Z_mean_M = numeric(),
+    Z_mean_F = numeric(),
+    Tract = character(), 
+    stringsAsFactors = FALSE)
   }
   
   # Create dataframe to store confidence intervals for all nodes from all tracts
@@ -50,6 +58,8 @@ run_tractable_single_tract_model <- function(df_z,
       )
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract_sex_diff(df_z, tract, metric)
+      # Apply FDR correction to the node-level p-values for this tract
+      node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues)
       
       # Filter for current tract
@@ -68,6 +78,8 @@ run_tractable_single_tract_model <- function(df_z,
       # gam.check(model, rep = 500)
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
+      # Apply FDR correction to the node-level p-values for this tract
+      node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
       
       # Filter for current tract
@@ -82,7 +94,7 @@ run_tractable_single_tract_model <- function(df_z,
     }
     
     model_summary = summary(model)
-  
+    
     intercept_p_value = model_summary$p.table["(Intercept)", "Pr(>|t|)"]
     
     # Construct result row for tract level statistics
@@ -100,16 +112,11 @@ run_tractable_single_tract_model <- function(df_z,
     
     # Append new row to tract-level statistics dataframe
     results_df <- rbind(results_df, new_row)
-    
-    # Apply FDR correction to the node-level p-values
-    node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
-    
-    
+  
   }
-    
+  
   return(list(
     results_df=results_df, 
     ci_all_nodes_all_tracts=ci_all_nodes_all_tracts, 
     node_ttest_pvalues=node_ttest_pvalues))
 }
-
