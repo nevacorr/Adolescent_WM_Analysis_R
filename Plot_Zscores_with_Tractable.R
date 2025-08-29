@@ -19,7 +19,7 @@ source("compute_t_scores_for_nodes_by_tract.R")
 source("compute_t_scores_for_nodes_by_tract_sex_diff.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -64,8 +64,8 @@ df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
 # # Run tractable_single_tract() for each tract and collect stats
-output <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric, output_image_path, NULL)
-results_df <- apply_fdr_correction(output$results_df, "sex_p")
+output_MF <-  run_tractable_single_tract_model(df_z, unique_tracts, 1, metric, output_image_path, NULL)
+results_df <- apply_fdr_correction(output_MF$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
 print(results_df)
@@ -106,6 +106,9 @@ ci_all_nodes_male = output_male$ci_all_nodes
 ci_all_nodes_female = output_female$ci_all_nodes
 write.csv(ci_all_nodes_female, paste0(metric, "_node_sig_stats_from_ci_female.csv"), row.names = FALSE)
 write.csv(ci_all_nodes_male, paste0(metric, "_node_sig_stats_from_ci_male.csv"), row.names = FALSE)
+
+node_vals_MF = output_MF$node_ttest_pvalues
+write.csv(node_vals_MF, paste0(metric, "_node_sig_stats_from_ttest_sexdiff.csv"), row.names = FALSE)
 
 node_vals_male = output_male$node_ttest_pvalues
 node_vals_female = output_female$node_ttest_pvalues
