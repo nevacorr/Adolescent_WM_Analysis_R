@@ -2,9 +2,11 @@
 compute_t_scores_for_nodes_by_tract <- function(df_z, tract) {
 
   # Initialize an empty dataframe to store t-test p-values for each node 
-  node_pvalues <- data.frame(Node = integer(), P_value = numeric(), 
-                                   Z_mean = numeric(),
-                                   Tract = character(), stringsAsFactors = FALSE)
+  node_pvalues <- data.frame(Node = integer(), 
+                             P_value = numeric(), 
+                             Z_mean = numeric(),
+                             Tract = character(), 
+                             stringsAsFactors = FALSE)
   
   # Loop through each node in the current tract
   for (node in unique(df_z$nodeID)) {
