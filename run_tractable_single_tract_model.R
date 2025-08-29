@@ -101,11 +101,12 @@ run_tractable_single_tract_model <- function(df_z,
     # Append new row to tract-level statistics dataframe
     results_df <- rbind(results_df, new_row)
     
+    # Apply FDR correction to the node-level p-values
+    node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
+    
+    
   }
     
-  # Apply FDR correction to the node-level p-values
-  node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
-  
   return(list(
     results_df=results_df, 
     ci_all_nodes_all_tracts=ci_all_nodes_all_tracts, 
