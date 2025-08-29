@@ -1,9 +1,8 @@
 compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
-
+  
   # Initialize an empty dataframe to store t-test p-values for each node 
   node_pvalues <- data.frame(Node = integer(), 
                              P_value = numeric(), 
-                             T_statistic = numeric(), 
                              Z_mean_M = numeric(),
                              Z_mean_F = numeric(),
                              Tract = character(), 
@@ -14,9 +13,9 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
     
     # Extract the observed data for the current node
     zs_M <- df_z[df_z$nodeID == node & df_z$tractID == tract 
-                      & df_z$sex == "M", "z", drop = TRUE]
+                 & df_z$sex == "M", "z", drop = TRUE]
     zs_F <- df_z[df_z$nodeID == node & df_z$tractID == tract 
-                      & df_z$sex == "F", "z", drop=TRUE]
+                 & df_z$sex == "F", "z", drop=TRUE]
     
     # Compute the mean z-scores for the current node 
     Z_mean_M <- mean(zs_M) 
@@ -30,7 +29,7 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
     
     # Calculate pooled variance
     pooled_var = (n_M - 1)/(n_M + n_F -2) * Z_var_M + 
-                                          (n_F - 1)/(n_M + n_F -2) * Z_var_F
+      (n_F - 1)/(n_M + n_F -2) * Z_var_F
     
     t_stat = (Z_mean_M - Z_mean_F) / sqrt(pooled_var * (1/n_M + 1/n_F))
     
@@ -51,21 +50,23 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
   
   # Plot values
   
+  node_pvalues_plot <- as.data.frame(node_pvalues)
+  
   # Add difference column
-  node_pvalues$Diff <- node_pvalues$Z_mean_M - node_pvalues$Z_mean_F
+  node_pvalues_plot$Diff <- node_pvalues_plot$Z_mean_M - node_pvalues_plot$Z_mean_F
   
   # Flag significance
-  node_pvalues$Significant <- node_pvalues$P_value <= 0.05
+  node_pvalues_plot$Significant <- node_pvalues_plot$P_value <= 0.05
   
   # Plot mean Z for males and females
-  p1 <- ggplot(node_pvalues, aes(x = Node)) +
-    geom_line(aes(y = Z_mean_M, color = "Male"), linewidth = 1) +
-    geom_line(aes(y = Z_mean_F, color = "Female"), linewidth = 1) +
-    geom_point(data = subset(node_pvalues, Significant),
+  p1 <- ggplot(node_pvalues_plot, aes(x = Node)) +
+    geom_line(aes(y = Z_mean_M, color = "Male")) +
+    geom_line(aes(y = Z_mean_F, color = "Female")) +
+    geom_point(data = subset(node_pvalues_plot, Significant),
                aes(y = (Z_mean_M + Z_mean_F)/2), 
                color = "red", size = 2) +
     labs(y = "Mean Z", color = "Group",
-         title = paste0("node_zdiff_sexdiff/", metric, 
+         title = paste0(metric, 
                         " Mean Z across nodes by sex — Tract: ", tract)) +
     theme(
       panel.background = element_rect(fill = "white"),
@@ -73,12 +74,12 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
   print(p1)
   
   # Plot difference (Male - Female)
-  p2 <- ggplot(node_pvalues, aes(x = Node, y = Diff)) +
+  p2 <- ggplot(node_pvalues_plot, aes(x = Node, y = Diff)) +
     geom_line(color = "darkblue", size = 1) +
-    geom_point(data = subset(node_pvalues, Significant),
-               aes(y = Diff), color = "red", linewidth = 2) +
+    geom_point(data = subset(node_pvalues_plot, Significant),
+               aes(y = Diff), color = "red") +
     labs(y = "Difference (Male - Female)",
-         title = paste0("node_zdiff_sexdiff/",metric, " Difference in mean Z across nodes — Tract: ", tract)) +
+         title = paste0(metric, " Difference in mean Z across nodes — Tract: ", tract)) +
     theme(
       panel.background = element_rect(fill = "white"),
       plot.background  = element_rect(fill = "white"))
@@ -91,5 +92,5 @@ compute_t_scores_for_nodes_by_tract_sex_diff <- function(df_z, tract, metric) {
   ggsave(filename = paste0("node_zdiff_sexdiff/", metric, "_", tract, 
                            "_diff_plot_M_F.png"), plot = p2, width = 8, height = 4, dpi = 300)
   
-return(node_pvalues)
+  return(node_pvalues)
 }
