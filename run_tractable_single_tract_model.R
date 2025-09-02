@@ -59,7 +59,8 @@ run_tractable_single_tract_model <- function(df_z,
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract_sex_diff(df_z, tract, metric)
       # Apply FDR correction to the node-level p-values for this tract
-      node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
+      node_pvalues$adjusted_p_value <- node_pvalues$P_value
+      # node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues)
       
       # Filter for current tract
@@ -79,7 +80,8 @@ run_tractable_single_tract_model <- function(df_z,
       
       node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
       # Apply FDR correction to the node-level p-values for this tract
-      node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
+      node_pvalues$adjusted_p_value <- node_pvalues$P_value
+      # node_pvalues$adjusted_p_value <- p.adjust(node_pvalues$P_value, method = "fdr")
       node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
       
       # Filter for current tract
