@@ -19,7 +19,7 @@ source("compute_t_scores_for_nodes_by_tract.R")
 source("compute_t_scores_for_nodes_by_tract_sex_diff.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -108,9 +108,9 @@ write.csv(ci_all_nodes_female, paste0(metric, "_node_sig_stats_from_ci_female.cs
 write.csv(ci_all_nodes_male, paste0(metric, "_node_sig_stats_from_ci_male.csv"), row.names = FALSE)
 
 node_vals_MF = output_MF$node_ttest_pvalues
-write.csv(node_vals_MF, paste0(metric, "_node_sig_stats_from_ttest_sexdiff_notcorrected.csv"), row.names = FALSE)
+write.csv(node_vals_MF, paste0(metric, "_node_sig_stats_from_ttest_sexdiff.csv"), row.names = FALSE)
 
 node_vals_male = output_male$node_ttest_pvalues
 node_vals_female = output_female$node_ttest_pvalues
-write.csv(node_vals_female, paste0(metric, "_node_sig_stats_from_ttest_female_notcorrected.csv"), row.names = FALSE)
-write.csv(node_vals_male, paste0(metric, "_node_sig_stats_from_ttest_male_notcorrected.csv"), row.names = FALSE)
+write.csv(node_vals_female, paste0(metric, "_node_sig_stats_from_ttest_female.csv"), row.names = FALSE)
+write.csv(node_vals_male, paste0(metric, "_node_sig_stats_from_ttest_male.csv"), row.names = FALSE)

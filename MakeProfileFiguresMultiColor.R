@@ -19,8 +19,8 @@ out_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
 tract_stats_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
 # Read in pvalue for significant difference from pre-covid data for males and females
-male_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_from_ttest_male_notcorrected.csv")))
-female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_from_ttest_female_notcorrected.csv")))
+male_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_male.csv")))
+female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_stats_gam_female.csv")))
 
 # add a column indicating sex
 male_pvalues$sex <- "M"
@@ -92,5 +92,5 @@ for (t in unique_tracts_for_plots) {
   }
   
   plot_specific_tracts_new_format(df_z_tract, t, 1, t, 5, 4, 
-                        metric, pvalues_for_tract, x_axis_string, out_path)
+                                  metric, pvalues_for_tract, x_axis_string, out_path)
 }
