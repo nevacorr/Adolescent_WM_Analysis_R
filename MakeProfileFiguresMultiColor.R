@@ -12,7 +12,7 @@ source("plot_from_tractable_sourcecode_edited.R")
 source("helper_functions.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 out_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
@@ -92,5 +92,5 @@ for (t in unique_tracts_for_plots) {
   }
   
   plot_specific_tracts_new_format(df_z_tract, t, 1, t, 5, 4, 
-                                  metric, pvalues_for_tract, x_axis_string, out_path)
+                        metric, pvalues_for_tract, x_axis_string, out_path)
 }
