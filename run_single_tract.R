@@ -2,7 +2,7 @@
 run_single_tract <- function(df_z, unique_tracts, metric) {
   
   wd="/Users/nevao/R_Projects/AdolWMAnalysis"
-  out_dir <- paste0(wd, '/output/')
+  out_dir <- paste0(wd,"/output_", metric, "/")
   gam_plot_dir <- paste0(out_dir, "plots_gam/")
   gam_stats_dir <- paste0(out_dir, "stats_gam/")
   table_dir <- paste0(out_dir, "tables/")
@@ -27,13 +27,16 @@ run_single_tract <- function(df_z, unique_tracts, metric) {
     gam_model <- readRDS(gam_file)
     
     # Plot the model for this tract
-    plot_gam_splines(gam_model, tract_data, tract, gam_plot_dir)
-    
+    # plot_gam_splines(gam_model, tract_data, tract, gam_plot_dir)
+   
+    print('calc_spline_diff')
+     
     # determine nodes of group differences
     comp_list <- c("M", "F")
-    node_list <- calc_spline_diff(gam_model, tract_data, tract, comp_list, gam_plot_dir)
-    all_node_list <- node_list[[1]]
-    max_node_list <- node_list[[2]]
+    node_list <- calc_spline_diff(gam_model, tract_data, tract, comp_list, 
+                                  gam_plot_dir, gam_stats_dir)
+    # all_node_list <- node_list[[1]]
+    # max_node_list <- node_list[[2]]
     
   }
   
@@ -134,7 +137,7 @@ run_single_tract <- function(df_z, unique_tracts, metric) {
   #     mutate(adjusted_p_value = p.adjust(P_value, method = "fdr")) %>%
   #     ungroup()
   # 
-  return(list(results_df = results_df, node_pvalues = node_pvalues))
+  # return(list(results_df = results_df, node_pvalues = node_pvalues))
   
 }
 
