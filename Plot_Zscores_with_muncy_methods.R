@@ -42,12 +42,13 @@ output_image_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots
 # define path of node stats output
 output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
-# read data file
+# read data file - zscores representing deviation from normative model
 z_orig <- read.csv(file.path(data_dir, data_filename))
 
 # remove first column
 z_orig <- select(z_orig, -X)
 
+# If there is a split column, average z-scores across the splits for each subject
 if ("split" %in% colnames(z_orig)) {
   z_orig <- average_across_splits(z_orig)
 }
@@ -74,45 +75,5 @@ unique_tracts <- unique(df_z$tractID)
 df_z <- df_z %>% filter(!is.na(z))
 
 # Run single_tract() for each tract and collect stats
-output <-  run_single_tract(df_z, unique_tracts, metric)
+run_single_tract(df_z, unique_tracts, metric)
 
-# print(output$results_df)
-# 
-# significant_tracts_sex_difference <- output$results_df %>%
-#   filter(sex_p_fdr <= 0.05) %>% 
-#   pull(tract)
-# 
-# significant_tracts_male <- output$results_df %>% 
-#   filter(male_p_fdr <= 0.05 ) %>% 
-#   pull(tract)
-# 
-# significant_tracts_female <- output$results_df %>% 
-#   filter(female_p_fdr <= 0.05 ) %>% 
-#   pull(tract)
-# 
-# print(paste("Tracts with significant post-covid sex differences in", metric, ":"))
-# cat(significant_tracts_sex_difference, sep = "\n")
-# 
-# print(paste("Tracts with significantly different",metric,"values post-covid for males:"))
-# cat(significant_tracts_male, sep = "\n")
-# 
-# print(paste("Tracts with significantly different",metric,"values post-covid for females:"))
-# cat(significant_tracts_female, sep = "\n")
-# 
-# node_vals = output$node_pvalues
-# 
-# # Create separate data frames
-# node_vals_female <- subset(node_vals, sex == "F")
-# node_vals_male <- subset(node_vals, sex == "M")
-# 
-# node_vals_female <- node_vals_female %>% select(-sex, -Metric)
-# node_vals_male <- node_vals_male %>% select(-sex, -Metric)
-# 
-# # Output file paths
-# output_node_file_female <- file.path(output_stats_path, paste0(metric, "_node_stats_gam_female.csv"))
-# output_node_file_male <- file.path(output_stats_path, paste0(metric, "_node_stats_gam_male.csv"))
-# 
-# # Write to CSV
-# write.csv(node_vals_female, output_node_file_female, row.names = FALSE)
-# write.csv(node_vals_male, output_node_file_male, row.names = FALSE)
-# 
