@@ -1,16 +1,18 @@
-# This code is from Supplementary Materials for NM Muncy, A Kimbler, 
+# This code is modified from Supplementary Materials for NM Muncy, A Kimbler, 
 # AM Hedges-Muncy, DL McMakin, AT Mattfeld. General additive models address 
 # statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
 calc_gam_stats <- function(tract, tract_name, gam_stats_dir) {
 
+  print('calc_gam_stats: plot mean data')
   # plot mean data 
   print(
     ggplot(data = tract) +
       geom_smooth(mapping = aes(x=nodeID, y=z))
   )
   
+  print('calc_gam_stats: plot mean data with data points')
   # plot mean data with original data points as well
   print(
     ggplot(data = tract) +

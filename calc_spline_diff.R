@@ -1,5 +1,5 @@
 
-# This code is from Supplementary Materials for NM Muncy, A Kimbler, 
+# This code is modified from Supplementary Materials for NM Muncy, A Kimbler, 
 # AM Hedges-Muncy, DL McMakin, AT Mattfeld. General additive models address 
 # statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
@@ -8,7 +8,8 @@ calc_spline_diff <- function(gam_model,
                              tract_data, 
                              tract, 
                              comp_list,
-                             gam_plot_dir) {
+                             gam_plot_dir, 
+                             gam_stats_dir) {
   # Investigate whether differences exist between spline fit 
   #
   # This function does a number of things:
@@ -28,19 +29,16 @@ calc_spline_diff <- function(gam_model,
   #     [[1]] = nodes which differed, [[2]] = node of maximum difference
   
   # make plots and tables
+  
   plot_spline_diff(gam_model, tract_data, tract, comp_list[1], comp_list[2], 
-                   gam_plot_dir)
+                   gam_plot_dir, gam_stats_dir)
   
-  browser()
-  
-  df_m <- make_spline_single_group_df(gam_model, tract_data, tract, gam_plot_dir, "M")
-  df_f <- make_spline_single_group_df(gam_model, tract_data, tract, gam_plot_dir, "F")
-  
-  browser()
+  df_m <- make_spline_single_group_df(gam_model, tract_data, tract, 
+                                      gam_plot_dir, gam_stats_dir, "M")
+  df_f <- make_spline_single_group_df(gam_model, tract_data, tract, 
+                                      gam_plot_dir, gam_stats_dir, "F")
   
   df_all <- rbind(df_m, df_f)
-  
-  browser()
   
   # get plot_diff data frames
   df_est_diff <- make_spline_diff_df(gam_model, tract_data, tract, 

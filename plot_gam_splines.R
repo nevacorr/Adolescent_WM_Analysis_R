@@ -1,8 +1,10 @@
-# This code is from Supplementary Materials for NM Muncy, A Kimbler, 
+# This code is from modified Supplementary Materials for NM Muncy, A Kimbler, 
 # AM Hedges-Muncy, DL McMakin, AT Mattfeld. General additive models address 
 # statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
+# This function saves to file the mean gam model for males and females separately
+# with confidence intervals for the tract
 plot_gam_splines <- function(gam_model, df_tract, tract_name, gam_plot_dir) {
   # Plot splines for a GAM
   #
@@ -34,6 +36,9 @@ plot_gam_splines <- function(gam_model, df_tract, tract_name, gam_plot_dir) {
   # set up for plot
   h_title <- paste0("GAM Fit of ", tract_name, " z scores by sex")
   
+  print('plot_gam_splines: plot gam fit z scores by sex')
+
+  
   # draw plot
   p <- ggplot(data = df_pred) +
     geom_smooth(mapping = aes(x = nodeID, y = fit, color = Group)) +
@@ -43,7 +48,7 @@ plot_gam_splines <- function(gam_model, df_tract, tract_name, gam_plot_dir) {
     theme(text = element_text(
       family = "Times New Roman", face = "bold", size = 14
     ))
-  
+
   ggsave(
     paste0(gam_plot_dir, "Plot_GAM_", tract_name, "_by_sex.png"),
     units = "in",

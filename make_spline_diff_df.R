@@ -30,13 +30,9 @@ make_spline_diff_df <- function(gam_model,
                        values = list(nodeID = sort(unique(tract_data$nodeID)))
   )
   
-  browser()
-  
   # add Comparison column to df
   colnames(df_pair) <- c(colnames(df_pair[, 1:4]), "Comp")
   df_pair$Comp <- paste0(factor_a, factor_b)
-  
-  browser()
   
   return(df_pair)
 }

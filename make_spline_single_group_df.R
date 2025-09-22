@@ -9,38 +9,31 @@ make_spline_single_group_df <- function(gam_model,
                                 output_image_path,
                                 output_stats_path,
                                 sex_str) {
-
-  num_comparisons <- 60
   
-  adj_alpha <- 0.05 / num_comparisons
-
-  z_adj <- qnorm(1 - adj_alpha / 2)
-
+  # Make sure the plot folder exists
+  dir.create(file.path(output_image_path, "ind_sex_plots"), showWarnings = FALSE)
+  
   # Make a plot output file
-  full_path <- file.path(output_image_path, 
+  full_path <- file.path(output_image_path, "ind_sex_plots",
                          paste0(tract, "model_plot", sex_str, ".png"))
   png(full_path, width=800, height=600, res=150)
   
+  set.seed(123)
   # determine predicted differences
   df_sex_val <- plot_smooth(gam_model,
                        view = "nodeID",
                        cond = list(sex = sex_str),   # only include sex of interest
                        n = 60, # 60 nodes
-                       se = z_adj,
+                       se = 1.96,
                        main = tract,
-                       rm.ranef = T
+                       sim.ci = TRUE,
+                       rm.ranef = TRUE
   )
   
   df_sex_val$fv$subjectID <- "population_mean"
   
   # Close device
   dev.off()
-  
-  # Check if the adjusted confidence intervals contain zero
-  pvalues <- ifelse(df_sex_val$fv$ll < 0 & df_sex_val$fv$ul > 0, 0.5, 0.01)
-  
-  # Add significance to a dataframe
-  df_sex_val$fv$pvalues <-  pvalues
   
   # Determine significance: 1 = significant, 0 = not
   df_sex_val$fv$signif <- ifelse(df_sex_val$fv$ll > 0 | df_sex_val$fv$ul < 0, 1, 0)
