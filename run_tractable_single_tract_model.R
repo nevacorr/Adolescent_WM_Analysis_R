@@ -64,7 +64,7 @@ run_tractable_single_tract_model <- function(df_z,
       
       # Calculate confidence intervals and significance of every node
       # using itsadug 
-      ci_single <- make_spline_single_group_df(model, tract_data, tract, output_image_path, sex_str)
+      ci_single <- make_spline_single_group_df_old(model, tract_data, tract, output_image_path, sex_str)
       ci_single$tract <- tract
       
       ci_all_nodes_all_tracts <- rbind(ci_all_nodes_all_tracts, ci_single)
