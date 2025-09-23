@@ -7,3 +7,14 @@ test.R
 *.png
 *.csv
 *.xcf
+Plot_Zscores_with_Tractable_and_itsadug.R
+Plot_Zscores_with_Tractable.R
+compute_t_scores_for_nodes_by_tract.R
+calculate_node_significance.R
+*.xlsx
+*.docx
+tractable\ manual\ examples.R
+test_tractable.R
+test_plot_tractable_node_locations.R
+step3_reduced_stats.R
+
