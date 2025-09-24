@@ -1,9 +1,12 @@
 library(tractable)
 library(tidyverse)
-library(dplyr)
 library(mgcv)
 library(itsadug)
 library(fitdistrplus)
+library(dplyr)
+library(conflicted)
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
 
 # Remove all variables in the environment
 rm(list = ls())
@@ -107,5 +110,5 @@ cat(significant_tracts_female, sep = "\n")
 
 node_vals_male = output_male$node_muncy_pvalues_all
 node_vals_female = output_female$node_muncy_pvalues_all
-write.csv(node_vals_female, paste0(metric, "_node_sig_stats_muncy_female.csv"), row.names = FALSE)
-write.csv(node_vals_male, paste0(metric, "_node_sig_stats_muncy_male.csv"), row.names = FALSE)
+write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female.csv")), row.names = FALSE)
+write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male.csv")), row.names = FALSE)
