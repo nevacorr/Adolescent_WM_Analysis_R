@@ -18,9 +18,30 @@ data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 out_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
 tract_stats_path = "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
+if (metric == "md") {
+  sig_tracts_male <-  c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation")
+  sig_tracts_female <-  c("Left.Thalamic.Radiation", "Right.Thalamic.Radiation", 
+                          "Callosum.Forceps.Major", "Callosum.Forceps.Minor", 
+                          "Left.IFOF", "Right.IFOF", "Right.ILF", "Left.Arcuate",
+                          "Right.Arcuate", "Right.SLF")
+}
+
+if (metric == "fa") {
+  sig_tracts_male <-  c("Right.ILF", "Right.IFOF")
+  sig_tracts_female <-  c("Left.Arcuate")
+}
+
 # Read in pvalue for significant difference from pre-covid data for males and females
-male_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_from_ttest_male.csv")))
-female_pvalues = read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_from_ttest_female.csv")))
+male_pvalues <-  read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_muncy_male.csv")))
+female_pvalues <-  read.csv(file.path(tract_stats_path, paste0(metric, "_node_sig_stats_muncy_female.csv")))
+
+# Keep significant pvalues for tracts that showed overall significance
+male_pvalues <- male_pvalues %>%
+  mutate(P_value = if_else(tract %in% sig_tracts_male, P_value, 0.6))
+
+# Keep significant pvalues for tracts that showed overall significance
+female_pvalues <- female_pvalues %>%
+  mutate(P_value = if_else(tract %in% sig_tracts_female, P_value, 0.6))
 
 # add a column indicating sex
 male_pvalues$sex <- "M"
@@ -28,7 +49,10 @@ female_pvalues$sex <- "F"
 
 # concatenate male and female pvalue dataframes and remove column that are not needed
 allpvalues <- bind_rows(male_pvalues, female_pvalues)
-allpvalues <- allpvalues %>% select(-Z_mean, -P_value)
+allpvalues <- allpvalues %>% select(-Z_mean)
+
+# rename column tract to Tract
+allpvalues <- allpvalues %>% rename(Tract = tract)
 
 # Replace '.' character with space for tract names
 allpvalues <- allpvalues %>%

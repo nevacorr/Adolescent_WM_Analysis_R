@@ -78,7 +78,7 @@ plot_specific_tracts_new_format = function(df_z, tractnames, sex, title_suff, wi
     )
     # Rename output file
     old_filename <- "tracts_by-sex_param-z_profile.png"
-    new_filename <- file.path(out_path, paste0("tracts_", metric,"_splits_", splits, title_suff,"_from_ttest_.png"))
+    new_filename <- file.path(out_path, paste0("tracts_", metric,"_splits_", splits, title_suff,"_from_muncy_.png"))
     file.rename(old_filename, new_filename)
   }
 }
