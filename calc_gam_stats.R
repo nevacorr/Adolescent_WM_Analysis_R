@@ -9,10 +9,8 @@ calc_gam_stats <- function(tract, tract_name, gam_stats_dir, sex_str) {
   
   print('calc_gam_stats: plot mean data')
   # plot mean data 
-  print(
-    ggplot(data = tract) +
+  p <- ggplot(data = tract) +
       geom_smooth(mapping = aes(x=nodeID, y=z))
-  )
   
   print('calc_gam_stats: plot mean data with data points')
   # plot mean data with original data points as well
