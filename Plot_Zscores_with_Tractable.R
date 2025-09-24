@@ -25,7 +25,7 @@ source("plot_spline_diff.R")
 source("calc_gam_stats.R")
 
 data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
 data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
@@ -75,13 +75,14 @@ results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
 print(results_df)
+dev.off()
 output_male <-  run_tractable_single_tract_model(df_z, df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
-results_df_male <- apply_fdr_correction(output_male$results_df_male, "intercept_p")
+results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
 print(metric)
 print("with only male data")
 print(results_df_male)
 output_female <-  run_tractable_single_tract_model(df_z, df_z_female, unique_tracts, 0, metric, output_image_path, 'female')
-results_df_female <- apply_fdr_correction(output_female$results_df_female, "intercept_p")
+results_df_female <- apply_fdr_correction(output_female$results_df, "intercept_p")
 print(metric)
 print("with only female data")
 print(results_df_female)
