@@ -66,12 +66,12 @@ df_z <- df_z %>% filter(!is.na(z))
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
-# # Run tractable_single_tract() for each tract and collect stats
-# output <-  run_tractable_single_tract_model(df_z, df_z, unique_tracts, 1, metric, output_image_path, NULL)
-# results_df <- apply_fdr_correction(output$results_df, "sex_p")
-# print(metric)
-# print("with sex as covariate")
-# print(results_df)
+# Run tractable_single_tract() for each tract and collect stats
+output <-  run_tractable_single_tract_model(df_z, df_z, unique_tracts, 1, metric, output_image_path, NULL)
+results_df <- apply_fdr_correction(output$results_df, "sex_p")
+print(metric)
+print("with sex as covariate")
+print(results_df)
 output_male <-  run_tractable_single_tract_model(df_z, df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
 results_df_male <- apply_fdr_correction(output_male$results_df_male, "intercept_p")
 print(metric)
