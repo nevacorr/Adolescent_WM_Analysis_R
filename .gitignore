@@ -17,4 +17,6 @@ tractable\ manual\ examples.R
 test_tractable.R
 test_plot_tractable_node_locations.R
 step3_reduced_stats.R
-
+nmuncy_code.R
+fdr_adjust_CIs.R
+*.swp
