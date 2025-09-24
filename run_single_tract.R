@@ -8,6 +8,10 @@ gam_plot_dir <- paste0(out_dir, "plots_gam/")
 gam_stats_dir <- paste0(out_dir, "stats_gam/")
 table_dir <- paste0(out_dir, "tables/")
 
+# Make output directories if they don't already exist
+dirs <- c(out_dir, gam_plot_dir, gam_stats_dir)
+for (d in dirs) dir.create(d, recursive = TRUE, showWarnings = FALSE)
+
 print(tract)
 
 # Set sex as a factor
