@@ -8,6 +8,7 @@ test.R
 *.csv
 *.xcf
 Plot_Zscores_with_Tractable_and_itsadug.R
+Plot_Zscores_with_muncy_methods.R
 compute_t_scores_for_nodes_by_tract.R
 calculate_node_significance.R
 *.xlsx
