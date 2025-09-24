@@ -1,4 +1,4 @@
-run_tractable_single_tract_model <- function(df_z, 
+run_tractable_single_tract_model <- function(df_z_both_sexes, df_z, 
                                              unique_tracts, 
                                              sexflag, 
                                              metric, 
@@ -18,16 +18,12 @@ run_tractable_single_tract_model <- function(df_z,
   }
   
   # Make an empty dataframe to store t-test p-values for each node for each tract
-  node_ttest_pvalues <- data.frame(
+  node_muncy_pvalues_all <- data.frame(
     Node = integer(), 
     P_value = numeric(), 
-    T_statistic = numeric(), 
     Z_mean = numeric(),
     Tract = character(), 
     stringsAsFactors = FALSE)
-  
-  # Create dataframe to store confidence intervals for all nodes from all tracts
-  ci_all_nodes_all_tracts <- data.frame()
   
   for (tract in unique_tracts) {
     
@@ -56,18 +52,23 @@ run_tractable_single_tract_model <- function(df_z,
       # check k
       # gam.check(model, rep = 500)
       
-      node_pvalues <- compute_t_scores_for_nodes_by_tract(df_z, tract)
-      node_ttest_pvalues <- rbind(node_ttest_pvalues, node_pvalues )
+      node_output <- run_single_tract(df_z_both_sexes, df_z, tract, metric, sex_str)
       
-      # Filter for current tract
-      tract_data <- df_z[df_z$tractID == tract, ]
+      # Compute mean z for each node for this tract
+      df_z_mean <- df_z %>%
+        filter(tractID == tract) %>%      # keep only this tract
+        group_by(nodeID) %>%              # group by node
+        summarise(Z_mean = mean(z, na.rm = TRUE)) %>%
+        ungroup()
       
-      # Calculate confidence intervals and significance of every node
-      # using itsadug 
-      ci_single <- make_spline_single_group_df_old(model, tract_data, tract, output_image_path, sex_str)
-      ci_single$tract <- tract
+      # Combine with p-values
+      node_muncy_pvalues <- df_z_mean %>%
+        left_join(node_output %>% select(nodeID, pvalue), by = "nodeID") %>%
+        rename(Node = nodeID,
+               P_value = pvalue) %>%
+        mutate(tract = tract)            # add tract column
       
-      ci_all_nodes_all_tracts <- rbind(ci_all_nodes_all_tracts, ci_single)
+      node_muncy_pvalues_all <- rbind(node_muncy_pvalues_all, node_muncy_pvalues )
     }
     
     model_summary = summary(model)
@@ -92,16 +93,8 @@ run_tractable_single_tract_model <- function(df_z,
     
   }
   
-  if (sexflag == 0) {
-    
-    # Apply FDR correction to the node-level p-values
-    node_ttest_pvalues$adjusted_p_value <- p.adjust(node_ttest_pvalues$P_value, method = "fdr")
-    
-  }
-  
   return(list(
     results_df=results_df, 
-    ci_all_nodes_all_tracts=ci_all_nodes_all_tracts, 
-    node_ttest_pvalues=node_ttest_pvalues))
+    node_muncy_pvalues_all=node_muncy_pvalues_all))
 }
 

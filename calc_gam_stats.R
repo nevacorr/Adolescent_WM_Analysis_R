@@ -3,8 +3,10 @@
 # statistical issues in diffusion MRI: An example with clinically anxious adolescents. 
 # Neuroimage Clin 2022:33:102937. doi: 10.1016/j.nicl.2022.102937. Epub 2022 Jan 5.
 
-calc_gam_stats <- function(tract, tract_name, gam_stats_dir) {
+calc_gam_stats <- function(tract, tract_name, gam_stats_dir, sex_str) {
 
+  sex_char <- ifelse(sex_str == "male", "M", "F")
+  
   print('calc_gam_stats: plot mean data')
   # plot mean data 
   print(
@@ -32,6 +34,7 @@ calc_gam_stats <- function(tract, tract_name, gam_stats_dir) {
                  s(subjectID, bs = "re"),
                  data = tract,
                  method = "REML")
+
   
   # check k
   gam.check(fit_gaussian, rep = 500) # check if k works well
@@ -42,7 +45,7 @@ calc_gam_stats <- function(tract, tract_name, gam_stats_dir) {
   capture.output(
     summary(fit_gaussian),
     file = paste0(
-      gam_stats_dir, "Stats_GAM-gaussian_", tract_name, ".txt"
+      gam_stats_dir, "Stats_GAM-gaussian_", tract_name, "_", sex_char, ".txt"
     )
   )
 
