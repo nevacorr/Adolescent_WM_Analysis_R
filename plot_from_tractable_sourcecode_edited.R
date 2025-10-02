@@ -279,10 +279,10 @@ plot_tract_profiles_my_edit <- function (
         axis.ticks.x = element_blank(),  # removes the x-axis ticks (marks)
         strip.background = ggplot2::element_blank(),   # removes the rectangle around title
         strip.text = ggplot2::element_text(size = 16),  # makes the text larger
-        axis.title.x = ggplot2::element_text(size = 18),   # larger x axis title
-        axis.title.y = ggplot2::element_text(size = 18),   # larger y axis title
+        axis.title.x = ggplot2::element_text(size = 22),   # larger x axis title
+        axis.title.y = ggplot2::element_text(size = 22),   # larger y axis title
         # axis.text.x  = ggplot2::element_text(size = 16),   # larger x tick labels
-        axis.text.y  = ggplot2::element_text(size = 16),   # larger y tick labels
+        axis.text.y  = ggplot2::element_text(size = 22),   # larger y tick labels
         legend.text  = ggplot2::element_text(size = 16),   # larger legend text
         legend.title = ggplot2::element_text(size = 18)    # larger legend title
         )
