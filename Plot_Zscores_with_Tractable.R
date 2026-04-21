@@ -24,15 +24,26 @@ source("make_spline_diff_df.R")
 source("plot_spline_diff.R")
 source("calc_gam_stats.R")
 
-data_dir = "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
-metric <-  "fa"
-splits <-  100
-data_filename = paste0("Z_time2_", metric, "_", splits, "_splits.csv")
 
-# define path of image output
-output_image_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
-# define path of node stats output
-output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
+metric <-  "md"
+splits <-  100
+sensitivity_analysis <- FALSE
+
+if (sensitivity_analysis) {
+  data_dir <- "/Users/nevao/Documents/Adol_WM_Data/Z_scores_sensitivity_analysis"
+  data_filename <- paste0("Z_time2_", metric, "_", splits, "_splits_sensitivity_analysis.csv")
+  # define path of image output
+  output_image_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/sens_analysis_tract profile plots"
+  # define path of node stats output
+  output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/sens_analysis_tract stats files"
+} else {
+  data_dir <- "/Users/nevao/Documents/Adol_WM_Data/Z_scores_time_2_100_splits"
+  data_filename <- paste0("Z_time2_", metric, "_", splits, "_splits.csv")
+  # define path of image output
+  output_image_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract profile plots"
+  # define path of node stats output
+  output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
+}
 
 # read z score data file
 z_orig <- read.csv(file.path(data_dir, data_filename))
@@ -75,17 +86,26 @@ results_df <- apply_fdr_correction(output$results_df, "sex_p")
 print(metric)
 print("with sex as covariate")
 print(results_df)
-dev.off()
+write.csv(results_df,
+          file = paste0(output_stats_path, "/effect_sizes_sex_diff_", metric, ".csv"),
+          row.names = FALSE)
+
 output_male <-  run_tractable_single_tract_model(df_z, df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
 results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
 print(metric)
 print("with only male data")
 print(results_df_male)
+write.csv(results_df_male,
+          file = paste0(output_stats_path, "/effect_sizes_male_", metric, ".csv"),
+          row.names = FALSE)
 output_female <-  run_tractable_single_tract_model(df_z, df_z_female, unique_tracts, 0, metric, output_image_path, 'female')
 results_df_female <- apply_fdr_correction(output_female$results_df, "intercept_p")
 print(metric)
 print("with only female data")
 print(results_df_female)
+write.csv(results_df_female,
+          file = paste0(output_stats_path, "/effect_sizes_female_", metric, ".csv"),
+          row.names = FALSE)
 print("\n")
 
 significant_tracts_sex_difference <- results_df %>%
@@ -109,7 +129,7 @@ cat(significant_tracts_male, sep = "\n")
 print(paste("Tracts with significantly different",metric,"values post-covid for females:"))
 cat(significant_tracts_female, sep = "\n")
 
-node_vals_male = output_male$node_muncy_pvalues_all
-node_vals_female = output_female$node_muncy_pvalues_all
-write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female.csv")), row.names = FALSE)
-write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male.csv")), row.names = FALSE)
+# node_vals_male = output_male$node_muncy_pvalues_all
+# node_vals_female = output_female$node_muncy_pvalues_all
+# write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female.csv")), row.names = FALSE)
+# write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male.csv")), row.names = FALSE)
