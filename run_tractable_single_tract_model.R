@@ -10,9 +10,11 @@ run_tractable_single_tract_model <- function(df_z_both_sexes, df_z,
     metric = character(),
     tract = character(),
     intercept_p = numeric(),
+    effect_size = numeric(),
     stringsAsFactors = FALSE
   )
   
+  # If comparing sexes, add a space to store that p value
   if (sexflag == 1) {
     results_df$sex_p <- numeric()
   }
@@ -40,35 +42,40 @@ run_tractable_single_tract_model <- function(df_z_both_sexes, df_z,
         node_group = "sex", 
         family = scat()
       )
+      fitted <- predict(model, type = "response")
+      effect_size <- NA
+
     } else {
       # If looking at each sex separately (df_z only has data for one sex)
+      # Fit gam model for this tract
       model <-  tractable_single_tract(
         df = df_z,
         tract = tract,
         target = 'z', 
         family = scat()
       )
+      fitted <- predict(model, type = "response")
+      effect_size <- mean(fitted, na.rm = TRUE)
       
-      # check k
-      # gam.check(model, rep = 500)
-      
-      node_output <- run_single_tract(df_z_both_sexes, df_z, tract, metric, sex_str)
-      
-      # Compute mean z for each node for this tract
-      df_z_mean <- df_z %>%
-        filter(tractID == tract) %>%      # keep only this tract
-        group_by(nodeID) %>%              # group by node
-        summarise(Z_mean = mean(z, na.rm = TRUE)) %>%
-        ungroup()
-      
-      # Combine with p-values
-      node_muncy_pvalues <- df_z_mean %>%
-        left_join(node_output %>% select(nodeID, pvalue), by = "nodeID") %>%
-        rename(Node = nodeID,
-               P_value = pvalue) %>%
-        mutate(tract = tract)            # add tract column
-      
-      node_muncy_pvalues_all <- rbind(node_muncy_pvalues_all, node_muncy_pvalues )
+      ################## NODE LEVEL INFERENCES#################
+      # node_output <- run_single_tract(df_z_both_sexes, df_z, tract, metric, sex_str)
+      # 
+      # # Compute mean z for each node for this tract
+      # df_z_mean <- df_z %>%
+      #   filter(tractID == tract) %>%      # keep only this tract
+      #   group_by(nodeID) %>%              # group by node
+      #   summarise(Z_mean = mean(z, na.rm = TRUE)) %>%
+      #   ungroup()
+      # 
+      # # Combine with p-values
+      # node_muncy_pvalues <- df_z_mean %>%
+      #   left_join(node_output %>% select(nodeID, pvalue), by = "nodeID") %>%
+      #   rename(Node = nodeID,
+      #          P_value = pvalue) %>%
+      #   mutate(tract = tract)            # add tract column
+      # 
+      # node_muncy_pvalues_all <- rbind(node_muncy_pvalues_all, node_muncy_pvalues )
+      ##########################################################
     }
     
     model_summary = summary(model)
@@ -79,13 +86,16 @@ run_tractable_single_tract_model <- function(df_z_both_sexes, df_z,
     new_row <- list(
       metric = metric, 
       tract = tract,
-      intercept_p = sprintf("%.3f", intercept_p_value)
+      intercept_p = sprintf("%.3f", intercept_p_value),
+      effect_size = effect_size
     )
     
     # If comparing sexes, add row for statistics for sex difference
     if (sexflag == 1) {
       sex_p_value = model_summary$p.table["sexM", "Pr(>|t|)"]
+      sex_effect_size = model_summary$p.table["sexM", "Estimate"]
       new_row$sex_p <- sprintf("%.3f",sex_p_value)
+      new_row$sex_effect_size <- sex_effect_size
     }
     
     # Append new row to tract-level statistics dataframe
