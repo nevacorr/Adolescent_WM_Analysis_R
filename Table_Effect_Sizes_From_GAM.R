@@ -2,7 +2,7 @@ library(dplyr)
 library(gt)
 library(patchwork)
 
-metric <- "md"
+metric <- "fa"
 output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
 
 # ==================================================
@@ -13,13 +13,13 @@ results_female <- read.csv(paste0(output_stats_path, "/effect_sizes_female_", me
 results_sex <- read.csv(paste0(output_stats_path, "/effect_sizes_sex_diff_", metric, ".csv"))
 
 # ==================================================
-# FIX SEX TABLE DUPLICATE COLUMN
+# FIX SEX COLUMN DUPLICATION
 # ==================================================
 results_sex <- results_sex[, names(results_sex) != "effect_size"]
 names(results_sex)[names(results_sex) == "sex_effect_size"] <- "effect_size"
 
 # ==================================================
-# FORMAT NUMBERS (2 DECIMAL PLACES)
+# FORMAT NUMERIC VALUES (p + FDR)
 # ==================================================
 fmt2 <- function(x) sprintf("%.2f", x)
 
@@ -28,7 +28,7 @@ results_female <- mutate(results_female, across(where(is.numeric), fmt2))
 results_sex    <- mutate(results_sex,    across(where(is.numeric), fmt2))
 
 # ==================================================
-# GT TABLE FUNCTION
+# GT TABLE FUNCTION (NO CI ANYMORE)
 # ==================================================
 make_table <- function(df, title, cols, center_cols, use_sex_p = FALSE) {
   
@@ -45,7 +45,7 @@ make_table <- function(df, title, cols, center_cols, use_sex_p = FALSE) {
     tbl <- tbl %>%
       cols_label(
         tract = "Tract",
-        effect_size = "effect size",
+        effect_size = "Effect size",
         sex_p = "p",
         FDR_corrected = "FDR"
       )
@@ -53,14 +53,14 @@ make_table <- function(df, title, cols, center_cols, use_sex_p = FALSE) {
     tbl <- tbl %>%
       cols_label(
         tract = "Tract",
-        effect_size = "effect size",
+        effect_size = "Effect size",
         intercept_p = "p",
         FDR_corrected = "FDR"
       )
   }
   
   # ---------------------------
-  # ALIGNMENT (CENTER EVERYTHING NUMERIC)
+  # ALIGNMENT
   # ---------------------------
   tbl <- tbl %>%
     
@@ -122,22 +122,19 @@ sex_tbl <- make_table(
 )
 
 # ==================================================
-# CONVERT TO GROBS
+# CONVERT TO GROBS + COMBINE
 # ==================================================
 male_g   <- gt::as_gtable(male_tbl)
 female_g <- gt::as_gtable(female_tbl)
 sex_g    <- gt::as_gtable(sex_tbl)
 
-# ==================================================
-# COMBINE SIDE-BY-SIDE
-# ==================================================
 final_plot <- wrap_elements(male_g) +
   wrap_elements(female_g) +
   wrap_elements(sex_g) +
   plot_layout(ncol = 3)
 
 # ==================================================
-# SAVE
+# SAVE FIGURE
 # ==================================================
 ggsave(
   filename = paste0(output_stats_path, "/effect_size_tables_", metric, ".png"),
