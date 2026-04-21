@@ -28,7 +28,7 @@ results_female <- mutate(results_female, across(where(is.numeric), fmt2))
 results_sex    <- mutate(results_sex,    across(where(is.numeric), fmt2))
 
 # ==================================================
-# GT TABLE FUNCTION (NO CI ANYMORE)
+# GT TABLE FUNCTION 
 # ==================================================
 make_table <- function(df, title, cols, center_cols, use_sex_p = FALSE) {
   
