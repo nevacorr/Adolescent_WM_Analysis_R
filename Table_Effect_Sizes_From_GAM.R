@@ -2,8 +2,14 @@ library(dplyr)
 library(gt)
 library(patchwork)
 
-metric <- "fa"
-output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
+sensitivity_analysis <- TRUE
+metric <- "md"
+
+if (sensitivity_analysis) {
+  output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/sens_analysis_tract stats files"
+} else {
+  output_stats_path <- "/Users/nevao/R_Projects/AdolWMAnalysis/tract stats files"
+}
 
 # ==================================================
 # LOAD DATA
