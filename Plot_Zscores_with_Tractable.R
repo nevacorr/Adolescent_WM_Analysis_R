@@ -25,9 +25,9 @@ source("plot_spline_diff.R")
 source("calc_gam_stats.R")
 
 
-metric <-  "md"
+metric <-  "fa"
 splits <-  100
-sensitivity_analysis <- FALSE
+sensitivity_analysis <- TRUE
 
 if (sensitivity_analysis) {
   data_dir <- "/Users/nevao/Documents/Adol_WM_Data/Z_scores_sensitivity_analysis"
@@ -131,5 +131,5 @@ cat(significant_tracts_female, sep = "\n")
 
 # node_vals_male = output_male$node_muncy_pvalues_all
 # node_vals_female = output_female$node_muncy_pvalues_all
-# write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female.csv")), row.names = FALSE)
-# write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male.csv")), row.names = FALSE)
+# write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female_Apr2026.csv")), row.names = FALSE)
+# write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male_Apr2026.csv")), row.names = FALSE)
