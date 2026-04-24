@@ -81,14 +81,14 @@ df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
 
 # Run tractable_single_tract() for each tract and collect stats
-output <-  run_tractable_single_tract_model(df_z, df_z, unique_tracts, 1, metric, output_image_path, NULL)
-results_df <- apply_fdr_correction(output$results_df, "sex_p")
-print(metric)
-print("with sex as covariate")
-print(results_df)
-write.csv(results_df,
-          file = paste0(output_stats_path, "/effect_sizes_sex_diff_", metric, ".csv"),
-          row.names = FALSE)
+# output <-  run_tractable_single_tract_model(df_z, df_z, unique_tracts, 1, metric, output_image_path, NULL)
+# results_df <- apply_fdr_correction(output$results_df, "sex_p")
+# print(metric)
+# print("with sex as covariate")
+# print(results_df)
+# write.csv(results_df,
+#           file = paste0(output_stats_path, "/effect_sizes_sex_diff_", metric, ".csv"),
+#           row.names = FALSE)
 
 output_male <-  run_tractable_single_tract_model(df_z, df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
 results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
@@ -108,9 +108,9 @@ write.csv(results_df_female,
           row.names = FALSE)
 print("\n")
 
-significant_tracts_sex_difference <- results_df %>%
-  filter(FDR_corrected <= 0.05) %>% 
-  pull(tract)
+# significant_tracts_sex_difference <- results_df %>%
+#   filter(FDR_corrected <= 0.05) %>% 
+#   pull(tract)
 
 significant_tracts_male <- results_df_male %>% 
   filter(FDR_corrected <= 0.05 ) %>% 
@@ -129,7 +129,7 @@ cat(significant_tracts_male, sep = "\n")
 print(paste("Tracts with significantly different",metric,"values post-covid for females:"))
 cat(significant_tracts_female, sep = "\n")
 
-# node_vals_male = output_male$node_muncy_pvalues_all
-# node_vals_female = output_female$node_muncy_pvalues_all
-# write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female_Apr2026.csv")), row.names = FALSE)
-# write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male_Apr2026.csv")), row.names = FALSE)
+node_vals_male = output_male$node_muncy_pvalues_all
+node_vals_female = output_female$node_muncy_pvalues_all
+write.csv(node_vals_female, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_female_Apr2026.csv")), row.names = FALSE)
+write.csv(node_vals_male, file.path(output_stats_path, paste0(metric, "_node_sig_stats_muncy_male_Apr2026.csv")), row.names = FALSE)
