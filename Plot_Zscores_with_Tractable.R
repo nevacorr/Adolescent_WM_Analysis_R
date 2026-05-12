@@ -25,7 +25,7 @@ source("plot_spline_diff.R")
 source("calc_gam_stats.R")
 
 
-metric <-  "fa"
+metric <-  "md"
 splits <-  100
 sensitivity_analysis <- TRUE
 
@@ -76,6 +76,9 @@ unique_tracts <- unique(df_z$tractID)
 # remove rows without zscores
 df_z <- df_z %>% filter(!is.na(z))
 
+# create version of dataframe without sex
+df_z_all <- df_z %>% dplyr::select(-sex)
+
 # create separate dataframe for each sex
 df_z_male = subset(df_z, sex != "F")
 df_z_female = subset(df_z, sex != "M")
@@ -90,6 +93,14 @@ df_z_female = subset(df_z, sex != "M")
 #           file = paste0(output_stats_path, "/effect_sizes_sex_diff_", metric, ".csv"),
 #           row.names = FALSE)
 
+output_all <- run_tractable_single_tract_model(df_z_all, df_z_all, unique_tracts, 0, metric, output_image_path, 'all')
+results_df_all <- apply_fdr_correction(output_all$results_df, "intercept_p")
+print(metric)
+print("pooled model (no sex in model")
+print(results_df_all)
+write.csv(results_df_all, file=paste0(output_stats_path, "/effect_sizes_all_", metric, ".csv"),
+          row.names=FALSE)
+
 output_male <-  run_tractable_single_tract_model(df_z, df_z_male, unique_tracts, 0, metric, output_image_path, 'male')
 results_df_male <- apply_fdr_correction(output_male$results_df, "intercept_p")
 print(metric)
@@ -98,6 +109,7 @@ print(results_df_male)
 write.csv(results_df_male,
           file = paste0(output_stats_path, "/effect_sizes_male_", metric, ".csv"),
           row.names = FALSE)
+
 output_female <-  run_tractable_single_tract_model(df_z, df_z_female, unique_tracts, 0, metric, output_image_path, 'female')
 results_df_female <- apply_fdr_correction(output_female$results_df, "intercept_p")
 print(metric)
