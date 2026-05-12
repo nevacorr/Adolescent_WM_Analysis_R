@@ -98,26 +98,28 @@ run_tractable_single_tract_model <- function(df_z_both_sexes, df_z,
       sex_ci_low <- NA
       sex_ci_high <- NA
       
-      # calculate node values
-      node_output <- run_single_tract(df_z_both_sexes, df_z, tract, metric, sex_str)
+      if (sex_str != "all") {
       
-      # Compute mean z for each node for this tract
-      df_z_mean <- df_z %>%
-        filter(tractID == tract) %>%      # keep only this tract
-        group_by(nodeID) %>%              # group by node
-        summarise(Z_mean = mean(z, na.rm = TRUE)) %>%
-        ungroup()
-      
-      # Combine with p-values
-      node_muncy_pvalues <- df_z_mean %>%
-        left_join(node_output %>% select(nodeID, pvalue), by = "nodeID") %>%
-        rename(Node = nodeID,
-               P_value = pvalue) %>%
-        mutate(tract = tract)            # add tract column
-      
-      node_muncy_pvalues_all <- rbind(node_muncy_pvalues_all, node_muncy_pvalues )
+        # calculate node values
+        node_output <- run_single_tract(df_z_both_sexes, df_z, tract, metric, sex_str)
+        
+        # Compute mean z for each node for this tract
+        df_z_mean <- df_z %>%
+          filter(tractID == tract) %>%      # keep only this tract
+          group_by(nodeID) %>%              # group by node
+          summarise(Z_mean = mean(z, na.rm = TRUE)) %>%
+          ungroup()
+        
+        # Combine with p-values
+        node_muncy_pvalues <- df_z_mean %>%
+          left_join(node_output %>% select(nodeID, pvalue), by = "nodeID") %>%
+          rename(Node = nodeID,
+                 P_value = pvalue) %>%
+          mutate(tract = tract)            # add tract column
+        
+        node_muncy_pvalues_all <- rbind(node_muncy_pvalues_all, node_muncy_pvalues )
+      }
     }
-      
     
     # -------------------------------
     # COMMON METRICS
